@@ -1,82 +1,33 @@
 package com.proofpoint.secureemailrelay.mail;
 
-
 import javax.json.bind.Jsonb;
 import javax.json.bind.JsonbBuilder;
 import javax.json.bind.JsonbConfig;
+import javax.json.bind.adapter.JsonbAdapter;
 import javax.json.bind.annotation.JsonbNillable;
 import javax.json.bind.annotation.JsonbProperty;
+import javax.json.bind.annotation.JsonbTypeAdapter;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Base64;
-import java.util.Objects;
 import java.util.UUID;
 
 @JsonbNillable
 public class Attachment {
     public static final IMimeMapper MimeTypeMapper = new DefaultMimeMapper();
-
-    public enum Disposition {
-        INLINE("inline"),
-        ATTACHMENT("attachment");
-
-        private final String value;
-
-        Disposition(String value) {
-            this.value = value;
-        }
-
-        public String getValue() {
-            return value;
-        }
-
-        public static Disposition fromString(String str) {
-            for (Disposition d : Disposition.values()) {
-                if (d.value.equalsIgnoreCase(str)) {
-                    return d;
-                }
-            }
-            throw new IllegalArgumentException("Invalid Disposition value: '" + str + "'.");
-        }
-    }
-
     private static final Jsonb JSONB = JsonbBuilder.create(new JsonbConfig().withFormatting(true));
-
     @JsonbProperty("content")
     private final String content;
-
     @JsonbProperty("disposition")
+    @JsonbTypeAdapter(DispositionJsonAdapter.class)
     private final Disposition disposition;
-
     @JsonbProperty("filename")
     private final String filename;
-
     @JsonbProperty("id")
     private final String contentId;
-
     @JsonbProperty("type")
     private final String mimeType;
-
-    public String getContent() {
-        return content;
-    }
-
-    public Disposition getDisposition() {
-        return disposition;
-    }
-
-    public String getFilename() {
-        return filename;
-    }
-
-    public String getContentId() {
-        return contentId;
-    }
-
-    public String getMimeType() {
-        return mimeType;
-    }
 
     private Attachment(String content, String filename, String mimeType, Disposition disposition, String contentId) {
         if (content == null) {
@@ -101,7 +52,7 @@ public class Attachment {
             throw new IllegalArgumentException("MIME type cannot be empty or contain only whitespace.");
         }
 
-        if( mimeType == null )
+        if (mimeType == null)
             mimeType = MimeTypeMapper.getMimeType(filename);
 
         if (mimeType.isBlank())
@@ -161,8 +112,64 @@ public class Attachment {
         return Base64.getEncoder().encodeToString(fileBytes);
     }
 
+    public String getContent() {
+        return content;
+    }
+
+    public Disposition getDisposition() {
+        return disposition;
+    }
+
+    public String getFilename() {
+        return filename;
+    }
+
+    public String getContentId() {
+        return contentId;
+    }
+
+    public String getMimeType() {
+        return mimeType;
+    }
+
     @Override
     public String toString() {
         return JSONB.toJson(this);
+    }
+
+    public enum Disposition {
+        INLINE("inline"),
+        ATTACHMENT("attachment");
+
+        private final String value;
+
+        Disposition(String value) {
+            this.value = value.toLowerCase();
+        }
+
+        public static Disposition fromString(String str) {
+            for (Disposition d : Disposition.values()) {
+                if (d.value.equalsIgnoreCase(str)) {
+                    return d;
+                }
+            }
+            throw new IllegalArgumentException("Invalid Disposition value: '" + str + "'");
+        }
+
+        public String getAttachmentType() {
+            return value;
+        }
+    }
+
+    public static class DispositionJsonAdapter implements JsonbAdapter<Disposition, String> {
+        @Override
+        public String adaptToJson(Disposition disposition) {
+            return disposition.getAttachmentType();
+        }
+
+        @Override
+        public Disposition adaptFromJson(String value) {
+            return Disposition.fromString(value);
+        }
     }
 }
