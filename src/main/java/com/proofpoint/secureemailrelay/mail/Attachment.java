@@ -1,5 +1,6 @@
 package com.proofpoint.secureemailrelay.mail;
 
+
 import javax.json.bind.Jsonb;
 import javax.json.bind.JsonbBuilder;
 import javax.json.bind.JsonbConfig;
@@ -9,10 +10,12 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Base64;
+import java.util.Objects;
 import java.util.UUID;
 
 @JsonbNillable
 public class Attachment {
+    public static final IMimeMapper MimeTypeMapper = new DefaultMimeMapper();
 
     public enum Disposition {
         INLINE("inline"),
@@ -37,6 +40,8 @@ public class Attachment {
             throw new IllegalArgumentException("Invalid Disposition value: '" + str + "'.");
         }
     }
+
+    private static final Jsonb JSONB = JsonbBuilder.create(new JsonbConfig().withFormatting(true));
 
     @JsonbProperty("content")
     private final String content;
@@ -74,15 +79,34 @@ public class Attachment {
     }
 
     private Attachment(String content, String filename, String mimeType, Disposition disposition, String contentId) {
-        if (content == null || content.isBlank()) {
-            throw new IllegalArgumentException("Content cannot be null or empty.");
+        if (content == null) {
+            throw new IllegalArgumentException("Content cannot be null.");
         }
-        if (filename == null || filename.isBlank()) {
-            throw new IllegalArgumentException("Filename cannot be null or empty.");
+
+        if (filename == null) {
+            throw new IllegalArgumentException("Filename cannot be null.");
         }
-        if (mimeType == null || mimeType.isBlank()) {
-            throw new IllegalArgumentException("MIME type cannot be null or empty.");
+
+        if (!tryDecodeBase64(content))
+            throw new IllegalArgumentException("Content must be a valid Base64-encoded string.");
+
+        if (filename.isBlank()) {
+            throw new IllegalArgumentException("Filename cannot be empty or contain only whitespace.");
         }
+
+        if (filename.length() > 1000)
+            throw new IllegalArgumentException("Filename must not exceed 1000 characters.");
+
+        if (mimeType != null && mimeType.isBlank()) {
+            throw new IllegalArgumentException("MIME type cannot be empty or contain only whitespace.");
+        }
+
+        if( mimeType == null )
+            mimeType = MimeTypeMapper.getMimeType(filename);
+
+        if (mimeType.isBlank())
+            throw new IllegalArgumentException("MIME type must be a valid, non-empty string.");
+
         if (disposition == null) {
             throw new IllegalArgumentException("Disposition cannot be null.");
         }
@@ -120,6 +144,15 @@ public class Attachment {
         return new Attachment(Base64.getEncoder().encodeToString(data), filename, mimeType, disposition, null);
     }
 
+    public static boolean tryDecodeBase64(String base64String) {
+        try {
+            Base64.getDecoder().decode(base64String);
+            return true;
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
+    }
+
     private static String encodeFileContent(File file) throws IOException {
         byte[] fileBytes = Files.readAllBytes(file.toPath());
         if (fileBytes.length == 0) {
@@ -130,11 +163,6 @@ public class Attachment {
 
     @Override
     public String toString() {
-        try {
-            Jsonb jsonb = JsonbBuilder.create(new JsonbConfig().withFormatting(true));
-            return jsonb.toJson(this);
-        } catch (Exception e) {
-            return "{}";
-        }
+        return JSONB.toJson(this);
     }
 }

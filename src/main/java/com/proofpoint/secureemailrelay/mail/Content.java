@@ -23,13 +23,11 @@ public final class Content {
         }
 
         public static ContentType fromString(String str) {
-            switch (str.toLowerCase()) {
-                case "text":
-                    return TEXT;
-                case "html":
-                    return HTML;
-                default:
-                    throw new IllegalArgumentException("Invalid ContentType value: '" + str + "'.");
+            Objects.requireNonNull(str, "ContentType string must not be null.");
+            try {
+                return ContentType.valueOf(str.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                throw new IllegalArgumentException("Invalid ContentType value: '" + str + "'. Expected 'TEXT' or 'HTML'.");
             }
         }
     }
@@ -38,13 +36,12 @@ public final class Content {
     private String body;
 
     @JsonbProperty("type")
-    private final ContentType contentType;
+    private ContentType contentType;
+
+    private static final Jsonb JSONB = JsonbBuilder.create(new JsonbConfig().withFormatting(true));
 
     public Content(String body, ContentType contentType) {
         this.body = Objects.requireNonNull(body, "Body must not be null.");
-        if (body.isBlank()) {
-            throw new IllegalArgumentException("Body must not be empty or contain only whitespace.");
-        }
         this.contentType = Objects.requireNonNull(contentType, "ContentType must not be null.");
     }
 
@@ -54,22 +51,18 @@ public final class Content {
 
     public void setBody(String body) {
         this.body = Objects.requireNonNull(body, "Body must not be null.");
-        if (body.isBlank()) {
-            throw new IllegalArgumentException("Body must not be empty or contain only whitespace.");
-        }
     }
 
     public ContentType getContentType() {
         return contentType;
     }
 
+    public void setContentType(ContentType contentType) {
+        this.contentType = Objects.requireNonNull(contentType, "ContentType must not be null.");
+    }
+
     @Override
     public String toString() {
-        try {
-            Jsonb jsonb = JsonbBuilder.create(new JsonbConfig().withFormatting(true));
-            return jsonb.toJson(this);
-        } catch (Exception e) {
-            return "{}";
-        }
+        return JSONB.toJson(this);
     }
 }
