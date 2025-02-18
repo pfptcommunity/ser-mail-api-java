@@ -11,18 +11,13 @@ import java.util.Objects;
 
 public final class Message {
 
+    private static final Jsonb JSONB = JsonbBuilder.create(new JsonbConfig().withFormatting(true));
     @JsonbProperty("attachments")
     private final List<Attachment> attachments = new ArrayList<>();
-
     @JsonbProperty("content")
     private final List<Content> content = new ArrayList<>();
-
     @JsonbProperty("from")
     private final MailUser from;
-
-    @JsonbProperty("headers")
-    private MessageHeaders headers;
-
     @JsonbProperty("subject")
     private final String subject;
 
@@ -37,8 +32,8 @@ public final class Message {
 
     @JsonbProperty("replyTos")
     private final List<MailUser> replyTos = new ArrayList<>();
-
-    private static final Jsonb JSONB = JsonbBuilder.create(new JsonbConfig().withFormatting(true));
+    @JsonbProperty("headers")
+    private MessageHeaders headers;
 
     public Message(String subject, MailUser from, MailUser headerFrom) {
         this(subject, from);
