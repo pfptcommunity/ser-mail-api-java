@@ -2,7 +2,11 @@ package com.proofpoint.secureemailrelay.mail;
 
 import javax.json.bind.Jsonb;
 import javax.json.bind.JsonbBuilder;
+import java.net.URI;
 import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
@@ -50,7 +54,13 @@ public final class Client {
             throw new IllegalStateException("Failed to serialize the message to JSON.", ex);
         }
 
-        return httpClient.postAsync("https://mail.ser.proofpoint.com/v1/send", json)
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create("https://mail.ser.proofpoint.com/v1/send"))
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(json, StandardCharsets.UTF_8))
+                .build();
+
+        return httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString())
                 .thenCompose(SendResult::createAsync)
                 .exceptionally(ex -> {
                     throw new IllegalStateException("Failed to send the email request due to an HTTP error.", ex);
