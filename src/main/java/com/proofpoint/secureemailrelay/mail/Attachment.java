@@ -14,7 +14,7 @@ import java.util.Base64;
 import java.util.UUID;
 
 @JsonbNillable
-public class Attachment {
+public final class Attachment {
     public static final IMimeMapper MimeTypeMapper = new DefaultMimeMapper();
     private static final Jsonb JSONB = JsonbBuilder.create(new JsonbConfig().withFormatting(true));
     @JsonbProperty("content")
