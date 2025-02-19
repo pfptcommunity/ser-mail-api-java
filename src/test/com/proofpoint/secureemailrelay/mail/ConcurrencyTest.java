@@ -1,11 +1,6 @@
 package test.com.proofpoint.secureemailrelay.mail;
 
-import com.proofpoint.secureemailrelay.mail.Client;
-import com.proofpoint.secureemailrelay.mail.Message;
-import com.proofpoint.secureemailrelay.mail.MailUser;
-import com.proofpoint.secureemailrelay.mail.Attachment;
-import com.proofpoint.secureemailrelay.mail.Content;
-import com.proofpoint.secureemailrelay.mail.SendResult;
+import com.proofpoint.secureemailrelay.mail.*;
 
 import javax.json.bind.Jsonb;
 import javax.json.bind.JsonbBuilder;
@@ -37,7 +32,8 @@ public class ConcurrencyTest {
         for (int i = 0; i < THREAD_COUNT; i++) {
             executorService.submit(() -> {
                 try {
-                    Message message = new Message("This is a test email", new MailUser("sender@example.com", "Joe Sender"));
+                    long tid = Thread.currentThread().getId();
+                    Message message = new Message("This is a test email", new MailUser("ljerabek@proofpointdemo.us", "Joe Sender"));
 
                     // Add text content body
                     message.addContent(new Content("This is a test message", Content.ContentType.TEXT));
@@ -79,12 +75,11 @@ public class ConcurrencyTest {
                     // Set Reply-To
                     message.addReplyTo(new MailUser("noreply@proofpoint.com", "No Reply"));
 
-                    System.out.println(message.toString());
                     SendResult sendResult = client.send(message).join();
-                    System.out.println("HTTP Status: " + sendResult.getHttpResponse().statusCode());
-                    System.out.println("Message ID: " + sendResult.getMessageId());
-                    System.out.println("Reason: " + sendResult.getReason());
-                    System.out.println("Request ID: " + sendResult.getRequestId());
+                    System.out.printf("[%d]HTTP Status: %d\n", tid, sendResult.getHttpResponse().statusCode());
+                    System.out.printf("[%d]Message ID: %s\n", tid, sendResult.getMessageId());
+                    System.out.printf("[%d]Reason: %s\n", tid, sendResult.getReason());
+                    System.out.printf("[%d]Request ID: %s\n", tid, sendResult.getRequestId());
                 } catch (Exception e) {
                     System.err.println("Thread: " + Thread.currentThread().getName() + " - Exception: " + e.getMessage());
                 }
@@ -98,6 +93,7 @@ public class ConcurrencyTest {
             }
         } catch (InterruptedException e) {
             executorService.shutdownNow();
+            Thread.currentThread().interrupt(); 
         }
     }
 }
