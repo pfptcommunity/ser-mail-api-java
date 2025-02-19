@@ -247,10 +247,6 @@ public final class Attachment {
         public OptionalStep fromBytes(byte[] data, String filename) {
             Objects.requireNonNull(data, "Byte array must not be null.");
             Objects.requireNonNull(filename, "Filename must not be null.");
-            if (data.length == 0) {
-                throw new IllegalArgumentException("Byte array must not be empty.");
-            }
-
             this.content = Base64.getEncoder().encodeToString(data);
             this.filename = filename;
             return this;
@@ -260,9 +256,7 @@ public final class Attachment {
         public OptionalStep fromBase64(String base64Content, String filename) {
             Objects.requireNonNull(base64Content, "Base64 content must not be null.");
             Objects.requireNonNull(filename, "Filename must not be null.");
-            if (base64Content.isBlank()) {
-                throw new IllegalArgumentException("Base64 content cannot be empty.");
-            }
+            tryDecodeBase64(base64Content);
             this.content = base64Content;
             this.filename = filename;
             return this;
@@ -270,8 +264,6 @@ public final class Attachment {
 
         @Override
         public Attachment build() {
-
-
             return new Attachment(
                     content,
                     filename,
