@@ -18,8 +18,8 @@ public final class Content {
     private ContentType contentType;
 
     public Content(String body, ContentType contentType) {
-        this.body = Objects.requireNonNull(body, "Body must not be null.");
-        this.contentType = Objects.requireNonNull(contentType, "ContentType must not be null.");
+        this.setBody(body);
+        this.setContentType(contentType);
     }
 
     public String getBody() {
@@ -35,7 +35,7 @@ public final class Content {
     }
 
     public void setContentType(ContentType contentType) {
-        this.contentType = Objects.requireNonNull(contentType, "ContentType must not be null.");
+        this.contentType = Objects.requireNonNull(contentType, "Content type must not be null.");
     }
 
     @Override
@@ -54,11 +54,11 @@ public final class Content {
         }
 
         public static ContentType fromString(String str) {
-            Objects.requireNonNull(str, "ContentType string must not be null.");
+            Objects.requireNonNull(str, "Content type string must not be null.");
             try {
                 return ContentType.valueOf(str.toUpperCase());
             } catch (IllegalArgumentException e) {
-                throw new IllegalArgumentException("Invalid ContentType value: '" + str + "'. Expected 'TEXT' or 'HTML'.");
+                throw new IllegalArgumentException("Invalid content type value: '" + str + "'. Expected 'TEXT' or 'HTML'.");
             }
         }
 
