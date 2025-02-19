@@ -1,5 +1,7 @@
 package com.proofpoint.secureemailrelay.mail;
 
+import com.proofpoint.secureemailrelay.http.OAuthHttpClient;
+
 import javax.json.bind.Jsonb;
 import javax.json.bind.JsonbBuilder;
 import java.net.URI;
@@ -61,9 +63,6 @@ public final class Client {
                 .build();
 
         return httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString())
-                .thenCompose(SendResult::createAsync)
-                .exceptionally(ex -> {
-                    throw new IllegalStateException("Failed to send the email request due to an HTTP error.", ex);
-                });
+                .thenCompose(SendResult::createAsync);
     }
 }
