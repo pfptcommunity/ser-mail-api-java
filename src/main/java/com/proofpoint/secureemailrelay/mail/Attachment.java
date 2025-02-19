@@ -4,17 +4,17 @@ import javax.json.bind.Jsonb;
 import javax.json.bind.JsonbBuilder;
 import javax.json.bind.JsonbConfig;
 import javax.json.bind.adapter.JsonbAdapter;
-import javax.json.bind.annotation.JsonbNillable;
 import javax.json.bind.annotation.JsonbProperty;
 import javax.json.bind.annotation.JsonbTypeAdapter;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Base64;
+import java.util.Objects;
 import java.util.UUID;
 
-@JsonbNillable
 public final class Attachment {
+
     public static final IMimeMapper MimeTypeMapper = new DefaultMimeMapper();
     private static final Jsonb JSONB = JsonbBuilder.create(new JsonbConfig().withFormatting(true));
     @JsonbProperty("content")
@@ -71,30 +71,6 @@ public final class Attachment {
                 : contentId;
     }
 
-    public static Attachment fromBase64(String base64Content, String filename, String mimeType, Disposition disposition, String contentId) {
-        return new Attachment(base64Content, filename, mimeType, disposition, contentId);
-    }
-
-    public static Attachment fromFile(String filePath, Disposition disposition, String contentId, String filename, String mimeType) throws IOException {
-        if (filePath == null || filePath.isBlank()) {
-            throw new IllegalArgumentException("File path cannot be null or empty.");
-        }
-        File file = new File(filePath);
-        if (!file.exists()) {
-            throw new IOException("File not found: '" + filePath + "'.");
-        }
-
-        String encodedContent = encodeFileContent(file);
-        return new Attachment(encodedContent, filename != null ? filename : file.getName(), mimeType, disposition, contentId);
-    }
-
-    public static Attachment fromBytes(byte[] data, String filename, String mimeType, Disposition disposition) {
-        if (data == null || data.length == 0) {
-            throw new IllegalArgumentException("Byte array must not be null or empty.");
-        }
-        return new Attachment(Base64.getEncoder().encodeToString(data), filename, mimeType, disposition, null);
-    }
-
     public static boolean tryDecodeBase64(String base64String) {
         try {
             Base64.getDecoder().decode(base64String);
@@ -104,12 +80,54 @@ public final class Attachment {
         }
     }
 
-    private static String encodeFileContent(File file) throws IOException {
+    public static String encodeFileContent(File file) throws IOException {
         byte[] fileBytes = Files.readAllBytes(file.toPath());
         if (fileBytes.length == 0) {
             throw new IllegalArgumentException("File '" + file.getPath() + "' is empty and cannot be converted to an attachment.");
         }
         return Base64.getEncoder().encodeToString(fileBytes);
+    }
+
+    public static OptionalStep fromFile(String filePath) {
+        Objects.requireNonNull(filePath, "File path must not be null.");
+        File file = new File(filePath);
+        if (!file.exists()) {
+            throw new RuntimeException("File not found: '" + filePath + "'.");
+        }
+
+        String encodedContent;
+        try {
+            byte[] fileBytes = Files.readAllBytes(file.toPath());
+            if (fileBytes.length == 0) {
+                throw new IllegalArgumentException("File '" + filePath + "' is empty.");
+            }
+            encodedContent = Base64.getEncoder().encodeToString(fileBytes);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to read file: " + filePath, e);
+        }
+
+        return new Builder(encodedContent, file.getName());
+    }
+
+    public static OptionalStep fromBytes(byte[] data, String filename) {
+        Objects.requireNonNull(data, "Byte array must not be null.");
+        Objects.requireNonNull(filename, "Filename must not be null.");
+        if (data.length == 0) {
+            throw new IllegalArgumentException("Byte array must not be empty.");
+        }
+
+        String encodedContent = Base64.getEncoder().encodeToString(data);
+        return new Builder(encodedContent, filename);
+    }
+
+    public static OptionalStep fromBase64(String base64Content, String filename) {
+        Objects.requireNonNull(base64Content, "Base64 content must not be null.");
+        Objects.requireNonNull(filename, "Filename must not be null.");
+        if (base64Content.isBlank()) {
+            throw new IllegalArgumentException("Base64 content cannot be empty.");
+        }
+
+        return new Builder(base64Content, filename);
     }
 
     public String getContent() {
@@ -161,6 +179,20 @@ public final class Attachment {
         }
     }
 
+    public interface OptionalStep {
+        OptionalStep dispositionAttached();
+
+        OptionalStep dispositionInline();
+
+        OptionalStep dispositionInline(String contentId);
+
+        OptionalStep filename(String filename);
+
+        OptionalStep mimeType(String mimeType);
+
+        Attachment build();
+    }
+
     public static class DispositionJsonAdapter implements JsonbAdapter<Disposition, String> {
         @Override
         public String adaptToJson(Disposition disposition) {
@@ -170,6 +202,67 @@ public final class Attachment {
         @Override
         public Disposition adaptFromJson(String value) {
             return Disposition.fromString(value);
+        }
+    }
+
+    private static class Builder implements OptionalStep {
+        private final String content;
+        private String filename;
+        private String mimeType;
+        private Disposition disposition;
+        private String contentId;
+
+
+        private Builder(String content, String filename) {
+            this.content = Objects.requireNonNull(content, "Content must not be null.");
+            this.filename = Objects.requireNonNull(filename, "File name must not be null.");
+            this.dispositionAttached();
+        }
+
+        @Override
+        public OptionalStep dispositionAttached() {
+            this.disposition = Disposition.ATTACHMENT;
+            this.contentId = null;
+            return this;
+        }
+
+        @Override
+        public OptionalStep dispositionInline() {
+            this.disposition = Disposition.INLINE;
+            this.contentId = null;
+            return this;
+        }
+
+        @Override
+        public OptionalStep dispositionInline(String contentId) {
+            this.contentId = Objects.requireNonNull(contentId, "ContentId must not be null.");
+            this.disposition = Disposition.INLINE;
+            return this;
+        }
+
+        @Override
+        public OptionalStep filename(String filename) {
+            this.filename = Objects.requireNonNull(filename, "Filename must not be null.");
+            return this;
+        }
+
+        @Override
+        public OptionalStep mimeType(String mimeType) {
+            this.mimeType = Objects.requireNonNull(mimeType, "MimeType must not be null.");
+            return this;
+        }
+
+        @Override
+        public Attachment build() {
+
+
+            return new Attachment(
+                    content,
+                    filename,
+                    mimeType,
+                    disposition,
+                    contentId
+            );
         }
     }
 }
