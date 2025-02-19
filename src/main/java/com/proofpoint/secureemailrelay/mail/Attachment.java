@@ -88,46 +88,8 @@ public final class Attachment {
         return Base64.getEncoder().encodeToString(fileBytes);
     }
 
-    public static OptionalStep fromFile(String filePath) {
-        Objects.requireNonNull(filePath, "File path must not be null.");
-        File file = new File(filePath);
-        if (!file.exists()) {
-            throw new RuntimeException("File not found: '" + filePath + "'.");
-        }
-
-        String encodedContent;
-        try {
-            byte[] fileBytes = Files.readAllBytes(file.toPath());
-            if (fileBytes.length == 0) {
-                throw new IllegalArgumentException("File '" + filePath + "' is empty.");
-            }
-            encodedContent = Base64.getEncoder().encodeToString(fileBytes);
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to read file: " + filePath, e);
-        }
-
-        return new Builder(encodedContent, file.getName());
-    }
-
-    public static OptionalStep fromBytes(byte[] data, String filename) {
-        Objects.requireNonNull(data, "Byte array must not be null.");
-        Objects.requireNonNull(filename, "Filename must not be null.");
-        if (data.length == 0) {
-            throw new IllegalArgumentException("Byte array must not be empty.");
-        }
-
-        String encodedContent = Base64.getEncoder().encodeToString(data);
-        return new Builder(encodedContent, filename);
-    }
-
-    public static OptionalStep fromBase64(String base64Content, String filename) {
-        Objects.requireNonNull(base64Content, "Base64 content must not be null.");
-        Objects.requireNonNull(filename, "Filename must not be null.");
-        if (base64Content.isBlank()) {
-            throw new IllegalArgumentException("Base64 content cannot be empty.");
-        }
-
-        return new Builder(base64Content, filename);
+    public static InitialStep builder() {
+        return new Builder();
     }
 
     public String getContent() {
@@ -179,6 +141,14 @@ public final class Attachment {
         }
     }
 
+    public interface InitialStep {
+        OptionalStep fromBase64(String base64Content, String filename);
+
+        OptionalStep fromFile(String filePath);
+
+        OptionalStep fromBytes(byte[] data, String filename);
+    }
+
     public interface OptionalStep {
         OptionalStep dispositionAttached();
 
@@ -205,17 +175,15 @@ public final class Attachment {
         }
     }
 
-    private static class Builder implements OptionalStep {
-        private final String content;
+    private static class Builder implements InitialStep, OptionalStep {
+        private String content;
         private String filename;
         private String mimeType;
         private Disposition disposition;
         private String contentId;
 
 
-        private Builder(String content, String filename) {
-            this.content = Objects.requireNonNull(content, "Content must not be null.");
-            this.filename = Objects.requireNonNull(filename, "File name must not be null.");
+        private Builder() {
             this.dispositionAttached();
         }
 
@@ -249,6 +217,54 @@ public final class Attachment {
         @Override
         public OptionalStep mimeType(String mimeType) {
             this.mimeType = Objects.requireNonNull(mimeType, "MimeType must not be null.");
+            return this;
+        }
+
+        @Override
+        public OptionalStep fromFile(String filePath) {
+            Objects.requireNonNull(filePath, "File path must not be null.");
+            File file = new File(filePath);
+            if (!file.exists()) {
+                throw new RuntimeException("File not found: '" + filePath + "'.");
+            }
+
+            String encodedContent;
+            try {
+                byte[] fileBytes = Files.readAllBytes(file.toPath());
+                if (fileBytes.length == 0) {
+                    throw new IllegalArgumentException("File '" + filePath + "' is empty.");
+                }
+                encodedContent = Base64.getEncoder().encodeToString(fileBytes);
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to read file: " + filePath, e);
+            }
+            this.content = encodedContent;
+            this.filename = file.getName();
+            return this;
+        }
+
+        @Override
+        public OptionalStep fromBytes(byte[] data, String filename) {
+            Objects.requireNonNull(data, "Byte array must not be null.");
+            Objects.requireNonNull(filename, "Filename must not be null.");
+            if (data.length == 0) {
+                throw new IllegalArgumentException("Byte array must not be empty.");
+            }
+
+            this.content = Base64.getEncoder().encodeToString(data);
+            this.filename = filename;
+            return this;
+        }
+
+        @Override
+        public OptionalStep fromBase64(String base64Content, String filename) {
+            Objects.requireNonNull(base64Content, "Base64 content must not be null.");
+            Objects.requireNonNull(filename, "Filename must not be null.");
+            if (base64Content.isBlank()) {
+                throw new IllegalArgumentException("Base64 content cannot be empty.");
+            }
+            this.content = base64Content;
+            this.filename = filename;
             return this;
         }
 
