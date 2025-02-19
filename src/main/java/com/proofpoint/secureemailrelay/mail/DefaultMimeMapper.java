@@ -1,7 +1,6 @@
 package com.proofpoint.secureemailrelay.mail;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -1078,7 +1077,7 @@ public final class DefaultMimeMapper implements IMimeMapper {
 
     public Map<String, String> getMimeTypeMappings() {
         synchronized (lock) {
-            return Collections.unmodifiableMap(new HashMap<>(mimeTypeMap));
+            return Map.copyOf(mimeTypeMap);
         }
     }
 
