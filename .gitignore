@@ -31,3 +31,6 @@ bin/
 .idea/
 *.iml
 target/
+
+# Ignore API key for test
+/ser.api_key
