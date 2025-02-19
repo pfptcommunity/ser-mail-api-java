@@ -7,24 +7,25 @@ import java.io.StringReader;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
-import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpResponse;
 import java.time.Instant;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class OAuthHttpClient implements IHttpClient {
-    private final int tokenRefreshOffset;
+
+public class OAuthHttpClient {
     private final HttpClient httpClient;
     private final String tokenEndpoint;
     private final String clientId;
     private final String clientSecret;
     private final String scope;
-    private final ReentrantLock tokenLock = new ReentrantLock();
-    private String accessToken;
-    private Instant tokenExpiration;
-    private CompletableFuture<Void> tokenRefreshFuture;
+    private final int tokenRefreshOffset;
+
+    private final AtomicReference<String> accessToken = new AtomicReference<>();
+    private final AtomicReference<Instant> tokenExpiration = new AtomicReference<>();
+    private final ReentrantLock refreshLock = new ReentrantLock();
 
     public OAuthHttpClient(String tokenEndpoint, String clientId, String clientSecret, String scope, int tokenRefreshOffset) {
         this(tokenEndpoint, clientId, clientSecret, scope, tokenRefreshOffset, HttpClient.newHttpClient());
@@ -43,125 +44,120 @@ public class OAuthHttpClient implements IHttpClient {
         this.tokenRefreshOffset = tokenRefreshOffset;
     }
 
-    private CompletableFuture<Void> ensureTokenAsync() {
-        if (accessToken != null && tokenExpiration != null && Instant.now().isBefore(tokenExpiration)) {
-            return CompletableFuture.completedFuture(null); // Use existing valid token
+    /**
+     * Ensures that a valid token is available before making a request.
+     */
+    private void ensureToken() {
+        String token = accessToken.get();
+        Instant expiration = tokenExpiration.get();
+
+        // If the token is still valid, return it immediately
+        if (token != null && expiration != null && Instant.now().isBefore(expiration)) {
+            return;
         }
 
-        tokenLock.lock();
+        // Lock only when a refresh is needed (threads waiting here for the update)
+        refreshLock.lock();
         try {
-            if (accessToken != null && tokenExpiration != null && Instant.now().isBefore(tokenExpiration)) {
-                return CompletableFuture.completedFuture(null); // Use existing valid token
+            // Double-check inside the lock to prevent redundant refreshes
+            token = accessToken.get();
+            expiration = tokenExpiration.get();
+
+            if (token != null && expiration != null && Instant.now().isBefore(expiration)) {
+                return;
             }
 
-            // If a refresh is already in progress, return the existing future
-            if (tokenRefreshFuture != null) {
-                return tokenRefreshFuture;
-            }
-
-            // Start a new token refresh and store the future
-            tokenRefreshFuture = refreshTokenAsync()
-                    .whenComplete((result, ex) -> {
-                        tokenLock.lock();
-                        try {
-                            tokenRefreshFuture = null; // Reset the refresh future after completion
-                        } finally {
-                            tokenLock.unlock();
-                        }
-                    });
-
-            return tokenRefreshFuture;
+            refreshToken();
         } finally {
-            tokenLock.unlock();
+            refreshLock.unlock();
         }
     }
 
-    private CompletableFuture<Void> refreshTokenAsync() {
+    /**
+     * Refreshes the OAuth token synchronously.
+     */
+    private void refreshToken() {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(tokenEndpoint))
-                .header("User-Agent", "Java-SER-API/1.0")
                 .header("Content-Type", "application/x-www-form-urlencoded")
-                .POST(BodyPublishers.ofString(
+                .POST(HttpRequest.BodyPublishers.ofString(
                         "grant_type=client_credentials"
                                 + "&client_id=" + clientId
                                 + "&client_secret=" + clientSecret
                                 + "&scope=" + scope))
                 .build();
 
-        return httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString())
-                .thenApply(HttpResponse::body)
-                .thenAccept(this::parseTokenResponse);
+        int maxRetries = 3;
+        long backoffMillis = 1000;
+
+        for (int retryCount = 0; retryCount < maxRetries; retryCount++) {
+            try {
+                HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+                if (response.statusCode() != 200) {
+                    throw new RuntimeException("OAuth token request failed: " + response.body());
+                }
+
+                try (JsonReader reader = Json.createReader(new StringReader(response.body()))) {
+                    JsonObject json = reader.readObject();
+                    String newAccessToken = json.getString("access_token", null);
+                    if (newAccessToken == null) {
+                        throw new IllegalStateException("OAuth token response did not contain an access token.");
+                    }
+
+                    Instant newExpiration;
+                    if (json.containsKey("token_expires_date_time")) {
+                        newExpiration = Instant.parse(json.getString("token_expires_date_time")).minusSeconds(tokenRefreshOffset);
+                    } else if (json.containsKey("expires_in")) {
+                        newExpiration = Instant.now().plusSeconds(json.getInt("expires_in") - tokenRefreshOffset);
+                    } else {
+                        throw new IllegalStateException("OAuth token response is missing expiration details.");
+                    }
+
+                    // Update the token atomically
+                    accessToken.set(newAccessToken);
+                    tokenExpiration.set(newExpiration);
+                    return;
+                }
+
+            } catch (Exception e) {
+                if (retryCount >= maxRetries - 1) {
+                    throw new RuntimeException("Failed to refresh token after " + maxRetries + " attempts", e);
+                }
+
+                try {
+                    Thread.sleep(backoffMillis * (1L << retryCount)); // Exponential backoff
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                    throw new RuntimeException("Token refresh interrupted", ie);
+                }
+            }
+        }
     }
 
-    private void parseTokenResponse(String responseBody) {
-        try (JsonReader reader = Json.createReader(new StringReader(responseBody))) {
-            JsonObject json = reader.readObject();
-            this.accessToken = json.getString("access_token", null);
-            if (this.accessToken == null) {
-                throw new IllegalStateException("OAuth token response did not contain an access token.");
-            }
 
-            if (json.containsKey("token_expires_date_time")) {
-                this.tokenExpiration = Instant.parse(json.getString("token_expires_date_time")).minusSeconds(tokenRefreshOffset);
-            } else if (json.containsKey("expires_in")) {
-                this.tokenExpiration = Instant.now().plusSeconds(json.getInt("expires_in") - tokenRefreshOffset);
-            } else {
-                throw new IllegalStateException("OAuth token response is missing expiration details.");
-            }
-        }
+    /**
+     * Provides 1-to-1 usage with HttpClient send.
+     */
+    public <T> CompletableFuture<HttpResponse<T>> sendAsync(HttpRequest request, HttpResponse.BodyHandler<T> responseBodyHandler) {
+        ensureToken();
+        HttpRequest.Builder authorizedRequestBuilder = copyRequest(request);
+        authorizedRequestBuilder.header("Authorization", "Bearer " + accessToken.get());
+        return httpClient.sendAsync(authorizedRequestBuilder.build(), responseBodyHandler);
     }
 
-    private HttpRequest.Builder createRequestBuilder(String requestUri, String method, String body) {
-        HttpRequest.Builder builder = HttpRequest.newBuilder(URI.create(requestUri))
-                .header("User-Agent", "Java-SER-API/1.0")
-                .header("Authorization", "Bearer " + accessToken);
-
-        if (body != null) {
-            builder.header("Content-Type", "application/json");
-        }
-
-        switch (method) {
-            case "GET":
-                builder.GET();
-                break;
-            case "POST":
-                builder.POST(BodyPublishers.ofString(body));
-                break;
-            case "PUT":
-                builder.PUT(BodyPublishers.ofString(body));
-                break;
-            case "DELETE":
-                builder.DELETE();
-                break;
-            default:
-                throw new IllegalArgumentException("Unsupported HTTP method: " + method);
-        }
-
+    /**
+     * Clone the HTTPRequest object.
+     */
+    private HttpRequest.Builder copyRequest(HttpRequest original) {
+        HttpRequest.Builder builder = HttpRequest.newBuilder().uri(original.uri()).method(original.method(), original.bodyPublisher().orElse(HttpRequest.BodyPublishers.noBody()));
+        original.headers().map().forEach((key, values) -> {
+            if (!key.equalsIgnoreCase("Authorization")) {
+                values.forEach(value -> builder.header(key, value));
+            }
+        });
+        original.timeout().ifPresent(builder::timeout);
+        original.version().ifPresent(builder::version);
+        builder.expectContinue(original.expectContinue());
         return builder;
-    }
-
-    @Override
-    public CompletableFuture<HttpResponse<String>> getAsync(String requestUri) {
-        return ensureTokenAsync().thenCompose(v -> httpClient.sendAsync(createRequestBuilder(requestUri, "GET", null).build(), HttpResponse.BodyHandlers.ofString()));
-    }
-
-    @Override
-    public CompletableFuture<HttpResponse<String>> postAsync(String requestUri, String content) {
-        return ensureTokenAsync().thenCompose(v -> httpClient.sendAsync(createRequestBuilder(requestUri, "POST", content).build(), HttpResponse.BodyHandlers.ofString()));
-    }
-
-    @Override
-    public CompletableFuture<HttpResponse<String>> putAsync(String requestUri, String content) {
-        return ensureTokenAsync().thenCompose(v -> httpClient.sendAsync(createRequestBuilder(requestUri, "PUT", content).build(), HttpResponse.BodyHandlers.ofString()));
-    }
-
-    @Override
-    public CompletableFuture<HttpResponse<String>> deleteAsync(String requestUri) {
-        return ensureTokenAsync().thenCompose(v -> httpClient.sendAsync(createRequestBuilder(requestUri, "DELETE", null).build(), HttpResponse.BodyHandlers.ofString()));
-    }
-
-    @Override
-    public CompletableFuture<HttpResponse<String>> sendAsync(HttpRequest request) {
-        return ensureTokenAsync().thenCompose(v -> httpClient.sendAsync(HttpRequest.newBuilder().header("Authorization", "Bearer " + accessToken).build(), HttpResponse.BodyHandlers.ofString()));
     }
 }
