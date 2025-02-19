@@ -1,8 +1,13 @@
-package com.proofpoint.secureemailrelay.mail;
+package com.proofpoint.secureemailrelay.http;
+
+import com.proofpoint.secureemailrelay.exceptions.HttpRequestException;
+import com.proofpoint.secureemailrelay.exceptions.HttpTokenRefreshException;
 
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
+import javax.json.stream.JsonParsingException;
+import java.io.IOException;
 import java.io.StringReader;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -22,6 +27,8 @@ public class OAuthHttpClient {
     private final String clientSecret;
     private final String scope;
     private final int tokenRefreshOffset;
+    private final int maxRetries = 3;
+    private final long backoffMillis = 1000;
 
     private final AtomicReference<String> accessToken = new AtomicReference<>();
     private final AtomicReference<Instant> tokenExpiration = new AtomicReference<>();
@@ -47,7 +54,7 @@ public class OAuthHttpClient {
     /**
      * Ensures that a valid token is available before making a request.
      */
-    private void ensureToken() {
+    private void ensureToken() throws HttpTokenRefreshException {
         String token = accessToken.get();
         Instant expiration = tokenExpiration.get();
 
@@ -76,7 +83,7 @@ public class OAuthHttpClient {
     /**
      * Refreshes the OAuth token synchronously.
      */
-    private void refreshToken() {
+    private void refreshToken() throws HttpTokenRefreshException {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(tokenEndpoint))
                 .header("Content-Type", "application/x-www-form-urlencoded")
@@ -87,50 +94,35 @@ public class OAuthHttpClient {
                                 + "&scope=" + scope))
                 .build();
 
-        int maxRetries = 3;
-        long backoffMillis = 1000;
+        try {
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
-        for (int retryCount = 0; retryCount < maxRetries; retryCount++) {
-            try {
-                HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-                if (response.statusCode() != 200) {
-                    throw new RuntimeException("OAuth token request failed: " + response.body());
+            try (JsonReader reader = Json.createReader(new StringReader(response.body()))) {
+                JsonObject json = reader.readObject();
+                String newAccessToken = json.getString("access_token", null);
+                if (newAccessToken == null) {
+                    throw new HttpTokenRefreshException("OAuth token response did not contain an access token.");
                 }
 
-                try (JsonReader reader = Json.createReader(new StringReader(response.body()))) {
-                    JsonObject json = reader.readObject();
-                    String newAccessToken = json.getString("access_token", null);
-                    if (newAccessToken == null) {
-                        throw new IllegalStateException("OAuth token response did not contain an access token.");
-                    }
-
-                    Instant newExpiration;
-                    if (json.containsKey("token_expires_date_time")) {
-                        newExpiration = Instant.parse(json.getString("token_expires_date_time")).minusSeconds(tokenRefreshOffset);
-                    } else if (json.containsKey("expires_in")) {
-                        newExpiration = Instant.now().plusSeconds(json.getInt("expires_in") - tokenRefreshOffset);
-                    } else {
-                        throw new IllegalStateException("OAuth token response is missing expiration details.");
-                    }
-
-                    // Update the token atomically
-                    accessToken.set(newAccessToken);
-                    tokenExpiration.set(newExpiration);
-                    return;
+                Instant newExpiration;
+                if (json.containsKey("token_expires_date_time")) {
+                    newExpiration = Instant.parse(json.getString("token_expires_date_time")).minusSeconds(tokenRefreshOffset);
+                } else if (json.containsKey("expires_in")) {
+                    newExpiration = Instant.now().plusSeconds(json.getInt("expires_in") - tokenRefreshOffset);
+                } else {
+                    throw new HttpTokenRefreshException("OAuth token response is missing expiration details.");
                 }
 
-            } catch (Exception e) {
-                if (retryCount >= maxRetries - 1) {
-                    throw new RuntimeException("Failed to refresh token after " + maxRetries + " attempts", e);
-                }
-
-                try {
-                    Thread.sleep(backoffMillis * (1L << retryCount)); // Exponential backoff
-                } catch (InterruptedException ie) {
-                    Thread.currentThread().interrupt();
-                    throw new RuntimeException("Token refresh interrupted", ie);
-                }
+                // Update the token atomically
+                accessToken.set(newAccessToken);
+                tokenExpiration.set(newExpiration);
             }
+        } catch (IOException e) {
+            throw new HttpTokenRefreshException("Failed to send HTTP request for OAuth token.", e);
+        } catch (JsonParsingException e) {
+            throw new HttpTokenRefreshException("Failed to parse JSON response for OAuth token.", e);
+        } catch (Exception e) {
+            throw new HttpTokenRefreshException("Unexpected error during OAuth token refresh.", e);
         }
     }
 
@@ -139,11 +131,32 @@ public class OAuthHttpClient {
      * Provides 1-to-1 usage with HttpClient send.
      */
     public <T> CompletableFuture<HttpResponse<T>> sendAsync(HttpRequest request, HttpResponse.BodyHandler<T> responseBodyHandler) {
-        ensureToken();
+        try {
+            ensureToken();
+        } catch (HttpTokenRefreshException e) {
+            CompletableFuture<HttpResponse<T>> failedFuture = new CompletableFuture<>();
+            failedFuture.completeExceptionally(new HttpRequestException("Failed to refresh token before sending request", e));
+            return failedFuture;
+        }
+
         HttpRequest.Builder authorizedRequestBuilder = copyRequest(request);
         authorizedRequestBuilder.header("Authorization", "Bearer " + accessToken.get());
-        return httpClient.sendAsync(authorizedRequestBuilder.build(), responseBodyHandler);
+
+        return httpClient.sendAsync(authorizedRequestBuilder.build(), responseBodyHandler)
+                .handle((response, ex) -> {
+                    if (ex != null) {
+                        String errorMessage = String.format(
+                                "Asynchronous request failed: %s %s",
+                                request.method(), request.uri()
+                        );
+                        CompletableFuture<HttpResponse<T>> failedFuture = new CompletableFuture<>();
+                        failedFuture.completeExceptionally(new HttpRequestException(errorMessage, ex));
+                        return failedFuture.join(); // Join forces this CompletableFuture to throw the exception
+                    }
+                    return response;
+                });
     }
+
 
     /**
      * Clone the HTTPRequest object.
