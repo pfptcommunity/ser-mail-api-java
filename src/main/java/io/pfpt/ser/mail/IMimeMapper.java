@@ -1,4 +1,4 @@
-package io.pfpt.secureemailrelay.mail;
+package io.pfpt.ser.mail;
 
 public interface IMimeMapper {
   String getMimeType(String fileName);

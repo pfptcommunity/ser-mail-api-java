@@ -1,4 +1,4 @@
-package io.pfpt.secureemailrelay.exceptions;
+package io.pfpt.ser.exceptions;
 
 public class HttpRequestException extends Exception {
   public HttpRequestException(String message) {

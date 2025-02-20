@@ -37,7 +37,7 @@ You can include the library in your project using **Maven**:
 ## Quick Start
 
 ```java
-import io.pfpt.secureemailrelay.mail.*;
+import io.pfpt.ser.mail.*;
 
 public class Example {
   public static void main(String[] args) {

@@ -1,4 +1,4 @@
-package io.pfpt.secureemailrelay.mail;
+package io.pfpt.ser.mail;
 
 import java.util.Collections;
 import java.util.Map;

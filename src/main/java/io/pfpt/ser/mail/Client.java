@@ -1,6 +1,6 @@
-package io.pfpt.secureemailrelay.mail;
+package io.pfpt.ser.mail;
 
-import io.pfpt.secureemailrelay.http.OAuthHttpClient;
+import io.pfpt.ser.http.OAuthHttpClient;
 
 import jakarta.json.bind.Jsonb;
 import jakarta.json.bind.JsonbBuilder;

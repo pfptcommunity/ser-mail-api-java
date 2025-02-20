@@ -1,7 +1,7 @@
-package io.pfpt.secureemailrelay.http;
+package io.pfpt.ser.http;
 
-import io.pfpt.secureemailrelay.exceptions.HttpRequestException;
-import io.pfpt.secureemailrelay.exceptions.HttpTokenRefreshException;
+import io.pfpt.ser.exceptions.HttpRequestException;
+import io.pfpt.ser.exceptions.HttpTokenRefreshException;
 import java.io.IOException;
 import java.io.StringReader;
 import java.net.URI;

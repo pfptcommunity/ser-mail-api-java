@@ -1,6 +1,6 @@
-package test.io.pfpt.secureemailrelay.mail;
+package test.io.pfpt.ser.mail;
 
-import io.pfpt.secureemailrelay.mail.*;
+import io.pfpt.ser.mail.*;
 
 import java.io.FileReader;
 import java.io.IOException;
