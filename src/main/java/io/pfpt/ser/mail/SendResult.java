@@ -1,12 +1,12 @@
 package io.pfpt.ser.mail;
 
-import jakarta.json.bind.Jsonb;
-import jakarta.json.bind.JsonbBuilder;
 import java.net.http.HttpResponse;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
+import jakarta.json.bind.Jsonb;
+import jakarta.json.bind.JsonbBuilder;
 
 public final class SendResult {
   private final String messageId;
@@ -22,11 +22,12 @@ public final class SendResult {
     Map<String, Object> parsedJson = new HashMap<>();
     if (!this.rawJson.isBlank()) {
       try (Jsonb jsonb = JsonbBuilder.create()) {
-        parsedJson =
-            jsonb.fromJson(
-                this.rawJson, new HashMap<String, Object>() {}.getClass().getGenericSuperclass());
+        parsedJson = jsonb.fromJson(
+                this.rawJson,
+                new HashMap<String, Object>() {}.getClass().getGenericSuperclass()
+        );
       } catch (Exception e) {
-        // Handle JSON parsing failure gracefully
+        // Handle JSON parsing failure gracefully—fields default to empty strings
       }
     }
 
