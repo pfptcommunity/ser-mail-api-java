@@ -56,8 +56,6 @@ jobs:
 
       - name: Deploy SNAPSHOT to Sonatype
         env:
-          OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
-          OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
         run: |
-          mvn clean deploy -DskipTests -Dgpg.passphrase=${{ secrets.GPG_PASSPHRASE }}
+          mvn clean deploy -DskipTests -Dgpg.passphrase=${{ secrets.GPG_PASSPHRASE }} -X
