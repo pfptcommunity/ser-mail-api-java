@@ -5,9 +5,10 @@
 
     <groupId>com.proofpoint.secureemailrelay</groupId>
     <artifactId>mail</artifactId>
-    <version>${project.version}</version>
+    <version>${revision}</version> <!-- This allows GitHub Actions to set the version -->
 
     <properties>
+        <revision>1.0.0</revision> <!-- Default version (overridden in CI) -->
         <maven.version.plugin>2.7</maven.version.plugin>
     </properties>
 
@@ -75,4 +76,10 @@
             </plugin>
         </plugins>
     </build>
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <url>https://maven.pkg.github.com/pfptcommunity/ser-mail-api-java</url>
+        </repository>
+    </distributionManagement>
 </project>
