@@ -1,6 +1,4 @@
-package test.io.pfpt.ser.mail;
-
-import io.pfpt.ser.mail.*;
+package io.pfpt.ser.mail;
 
 import java.io.FileReader;
 import java.io.IOException;
@@ -8,7 +6,7 @@ import java.util.Map;
 import jakarta.json.bind.Jsonb;
 import jakarta.json.bind.JsonbBuilder;
 
-public class Example {
+public class SimpleExample {
 
   public static Map<String, String> loadConfig(String filePath) {
     Jsonb jsonb = JsonbBuilder.create();

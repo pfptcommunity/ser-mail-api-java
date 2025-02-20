@@ -1,6 +1,4 @@
-package test.io.pfpt.ser.mail;
-
-import io.pfpt.ser.mail.*;
+package io.pfpt.ser.mail;
 
 import java.io.FileReader;
 import java.io.IOException;
@@ -11,7 +9,7 @@ import java.util.concurrent.TimeUnit;
 import jakarta.json.bind.Jsonb;
 import jakarta.json.bind.JsonbBuilder;
 
-public class ConcurrencyTest {
+public class ConcurrencyExample {
   public static Map<String, String> loadConfig(String filePath) {
     Jsonb jsonb = JsonbBuilder.create();
     try (FileReader reader = new FileReader(filePath)) {
