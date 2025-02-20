@@ -14,8 +14,8 @@ You can include the library in your project using **Maven**:
 
 ```xml
 <dependency>
-    <groupId>com.proofpoint.secureemailrelay</groupId>
-    <artifactId>mail</artifactId>
+    <groupId>io.pfpt.ser</groupId>
+    <artifactId>ser-mail-api</artifactId>
     <version>1.0.0</version>
 </dependency>
 ```
