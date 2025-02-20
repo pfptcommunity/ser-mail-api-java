@@ -28,11 +28,20 @@ jobs:
         id: compute_version
         run: |
           # Get the last Git tag (release version)
-          LAST_TAG=$(git describe --tags --abbrev=0 || echo "v0.0.0")
+          if git describe --tags --abbrev=0 >/dev/null 2>&1; then
+              LAST_TAG=$(git describe --tags --abbrev=0)
+          else
+              LAST_TAG="v0.0.0"  # Default if no release exists
+          fi
+
           LAST_VERSION=${LAST_TAG#v}  # Remove "v" prefix
-          
-          # Count commits since last major release
-          COMMIT_COUNT=$(git rev-list ${LAST_TAG}..HEAD --count)
+
+          # Count commits since last tag OR count all commits if no tags exist
+          if [ "$LAST_TAG" = "v0.0.0" ]; then
+              COMMIT_COUNT=$(git rev-list --count HEAD)  # Count from first commit
+          else
+              COMMIT_COUNT=$(git rev-list ${LAST_TAG}..HEAD --count)
+          fi
 
           # Construct version: 1.0.0.40-SNAPSHOT
           CUSTOM_VERSION="${LAST_VERSION}.${COMMIT_COUNT}-SNAPSHOT"
