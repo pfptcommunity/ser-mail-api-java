@@ -1,0 +1,36 @@
+name: Test Maven Central Workflow
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v4
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+
+      - name: Import GPG key
+        run: |
+          echo "${{ secrets.GPG_KEY }}" | gpg --batch --import
+          echo "GPG key imported successfully"
+
+      - name: Simulate Version Extraction
+        run: |
+          echo "Simulating version extraction"
+          echo "version=0.1.0-test" >> "$GITHUB_ENV"
+
+      - name: Simulate Maven Release Process (Dry Run)
+        run: |
+          mvn -B release:prepare -DdryRun=true
+
+      - name: Confirm Test Run
+        run: echo "Test workflow executed successfully."
