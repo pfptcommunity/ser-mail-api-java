@@ -59,4 +59,5 @@ jobs:
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
         run: |
           mvn clean deploy -DskipTests -Dgpg.passphrase=${{ secrets.GPG_PASSPHRASE }} \
-            -DaltDeploymentRepository=ossrh-publisher::default::https://aws.publisher.sonatype.dev/v1/snapshots
+            -DaltDeploymentRepository=ossrh-publisher::default::https://publisher.sonatype.dev/v1/snapshots
+
