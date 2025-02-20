@@ -22,7 +22,7 @@ jobs:
 
       - name: Import GPG key
         run: |
-          echo "${{ secrets.GPG_KEY }}" | gpg --import
+          echo "${{ secrets.GPG_KEY }}" | gpg --batch --import
           echo "GPG key imported successfully"
 
       - name: Set Git user
@@ -36,7 +36,7 @@ jobs:
           TAG=${{ github.event.release.tag_name }}
           VERSION=${TAG#v}  # Remove 'v' prefix
           echo "Extracted version: $VERSION"
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "version=$VERSION" >> "$GITHUB_ENV"
 
       - name: Publish to Maven Central
         env:
@@ -44,11 +44,13 @@ jobs:
           OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
         run: |
-          mvn -B release:prepare release:perform \
-            -Drelease.version=${{ steps.extract_version.outputs.version }} \
-            -DdevelopmentVersion=${{ steps.extract_version.outputs.version }}-SNAPSHOT \
+          mvn -B release:prepare \
+            -Drelease.version=${{ env.version }} \
+            -DdevelopmentVersion=${{ env.version }}-SNAPSHOT \
             -Dtag=${{ github.event.release.tag_name }} \
-            -Darguments="-Dgpg.passphrase=${{ secrets.GPG_PASSPHRASE }}"
+            -Dgpg.passphrase=${{ secrets.GPG_PASSPHRASE }}
+
+          mvn -B release:perform -Dgpg.passphrase=${{ secrets.GPG_PASSPHRASE }}
 
       - name: Verify deployment
         run: echo "Published version ${{ github.event.release.tag_name }} to Maven Central"
