@@ -1,4 +1,4 @@
-# Proofpoint Secure Email Relay Java Library
+# Proofpoint Secure Email Relay Mail API Java Library
 
 This library implements all the functions of the SER Email Relay API via **Java**.
 
