@@ -2,11 +2,6 @@ package com.proofpoint.secureemailrelay.http;
 
 import com.proofpoint.secureemailrelay.exceptions.HttpRequestException;
 import com.proofpoint.secureemailrelay.exceptions.HttpTokenRefreshException;
-
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.json.JsonReader;
-import javax.json.stream.JsonParsingException;
 import java.io.IOException;
 import java.io.StringReader;
 import java.net.URI;
@@ -18,7 +13,10 @@ import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReentrantLock;
-
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
+import javax.json.stream.JsonParsingException;
 
 public class OAuthHttpClient {
     private final HttpClient httpClient;
@@ -27,8 +25,6 @@ public class OAuthHttpClient {
     private final String clientSecret;
     private final String scope;
     private final int tokenRefreshOffset;
-    private final int maxRetries = 3;
-    private final long backoffMillis = 1000;
 
     private final AtomicReference<String> accessToken = new AtomicReference<>();
     private final AtomicReference<Instant> tokenExpiration = new AtomicReference<>();

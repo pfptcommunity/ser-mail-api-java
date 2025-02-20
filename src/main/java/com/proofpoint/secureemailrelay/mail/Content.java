@@ -1,12 +1,12 @@
 package com.proofpoint.secureemailrelay.mail;
 
+import java.util.Objects;
 import javax.json.bind.Jsonb;
 import javax.json.bind.JsonbBuilder;
 import javax.json.bind.JsonbConfig;
 import javax.json.bind.adapter.JsonbAdapter;
 import javax.json.bind.annotation.JsonbProperty;
 import javax.json.bind.annotation.JsonbTypeAdapter;
-import java.util.Objects;
 
 public final class Content {
 

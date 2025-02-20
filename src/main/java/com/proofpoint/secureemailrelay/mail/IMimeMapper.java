@@ -1,7 +1,7 @@
 package com.proofpoint.secureemailrelay.mail;
 
 public interface IMimeMapper {
-    String getMimeType(String fileName);
+  String getMimeType(String fileName);
 
-    boolean isValidMimeType(String mimeType);
+  boolean isValidMimeType(String mimeType);
 }
