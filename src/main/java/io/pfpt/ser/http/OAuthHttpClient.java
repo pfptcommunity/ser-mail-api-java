@@ -11,6 +11,7 @@ import java.net.http.HttpResponse;
 import java.time.Instant;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -140,15 +141,13 @@ public class OAuthHttpClient {
         authorizedRequestBuilder.header("Authorization", "Bearer " + accessToken.get());
 
         return httpClient.sendAsync(authorizedRequestBuilder.build(), responseBodyHandler)
-                .handle((response, ex) -> {
-                    if (ex != null) {
+                .handle((response, throwable) -> {
+                    if (throwable != null) {
                         String errorMessage = String.format(
                                 "Asynchronous request failed: %s %s",
                                 request.method(), request.uri()
                         );
-                        CompletableFuture<HttpResponse<T>> failedFuture = new CompletableFuture<>();
-                        failedFuture.completeExceptionally(new HttpRequestException(errorMessage, ex));
-                        return failedFuture.join(); // Join forces this CompletableFuture to throw the exception
+                        throw new CompletionException(errorMessage, throwable);
                     }
                     return response;
                 });
