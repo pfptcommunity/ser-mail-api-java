@@ -1,4 +1,4 @@
-name: Deploy SNAPSHOT to Sonatype
+name: Deploy SNAPSHOT to Sonatype Publisher API
 
 on:
   workflow_dispatch: # Allows manual trigger
@@ -13,15 +13,15 @@ jobs:
         with:
           fetch-depth: 0 # Fetch full commit history for versioning
 
-      - name: Set up JDK 11
+      - name: Set up JDK 11 with Token Authentication
         uses: actions/setup-java@v4
         with:
           java-version: '11'
           distribution: 'temurin'
-          server-id: ossrh
+          server-id: ossrh-publisher
           settings-path: ${{ github.workspace }}
-          server-username: ${{ secrets.OSSRH_USERNAME }}
-          server-password: ${{ secrets.OSSRH_PASSWORD }}
+          server-username: ${{ secrets.OSSRH_USER }}
+          server-password: ${{ secrets.OSSRH_TOKEN }}
 
       - name: Import GPG key
         run: echo "${{ secrets.GPG_KEY }}" | gpg --batch --import
@@ -29,33 +29,22 @@ jobs:
       - name: Compute Custom SNAPSHOT Version
         id: compute_version
         run: |
-          # Get the last Git tag (release version)
           if git describe --tags --abbrev=0 >/dev/null 2>&1; then
               LAST_TAG=$(git describe --tags --abbrev=0)
           else
-              LAST_TAG="v0.0.0"  # Default if no release exists
+              LAST_TAG="v0.0.0"
           fi
-
-          LAST_VERSION=${LAST_TAG#v}  # Remove "v" prefix
-
-          # Count commits since last tag OR count all commits if no tags exist
-          if [ "$LAST_TAG" = "v0.0.0" ]; then
-              COMMIT_COUNT=$(git rev-list --count HEAD)  # Count from first commit
-          else
-              COMMIT_COUNT=$(git rev-list ${LAST_TAG}..HEAD --count)
-          fi
-
-          # Construct version: 1.0.0.40-SNAPSHOT
+          LAST_VERSION=${LAST_TAG#v}
+          COMMIT_COUNT=$(git rev-list ${LAST_TAG}..HEAD --count 2>/dev/null || echo "0")
           CUSTOM_VERSION="${LAST_VERSION}.${COMMIT_COUNT}-SNAPSHOT"
-
-          echo "Computed SNAPSHOT version: $CUSTOM_VERSION"
           echo "SNAPSHOT_VERSION=$CUSTOM_VERSION" >> $GITHUB_ENV
 
       - name: Set Version in Maven
         run: mvn versions:set -DnewVersion=${{ env.SNAPSHOT_VERSION }} -DgenerateBackupPoms=false
 
-      - name: Deploy SNAPSHOT to Sonatype
+      - name: Deploy SNAPSHOT Using Publisher API
         env:
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
         run: |
-          mvn clean deploy -DskipTests -Dgpg.passphrase=${{ secrets.GPG_PASSPHRASE }} -X
+          mvn clean deploy -DskipTests -Dgpg.passphrase=${{ secrets.GPG_PASSPHRASE }} \
+            -DaltDeploymentRepository=ossrh-publisher::default::https://aws.publisher.sonatype.dev/v1/snapshots
