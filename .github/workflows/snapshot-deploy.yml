@@ -11,7 +11,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 0 # Fetch full commit history for versioning
 
       - name: Set up JDK 11
         uses: actions/setup-java@v4
@@ -23,6 +23,25 @@ jobs:
 
       - name: Import GPG key
         run: echo "${{ secrets.GPG_KEY }}" | gpg --batch --import
+
+      - name: Compute Custom SNAPSHOT Version
+        id: compute_version
+        run: |
+          # Get the last Git tag (release version)
+          LAST_TAG=$(git describe --tags --abbrev=0 || echo "v0.0.0")
+          LAST_VERSION=${LAST_TAG#v}  # Remove "v" prefix
+          
+          # Count commits since last major release
+          COMMIT_COUNT=$(git rev-list ${LAST_TAG}..HEAD --count)
+
+          # Construct version: 1.0.0.40-SNAPSHOT
+          CUSTOM_VERSION="${LAST_VERSION}.${COMMIT_COUNT}-SNAPSHOT"
+
+          echo "Computed SNAPSHOT version: $CUSTOM_VERSION"
+          echo "SNAPSHOT_VERSION=$CUSTOM_VERSION" >> $GITHUB_ENV
+
+      - name: Set Version in Maven
+        run: mvn versions:set -DnewVersion=${{ env.SNAPSHOT_VERSION }} -DgenerateBackupPoms=false
 
       - name: Deploy SNAPSHOT to Sonatype
         env:
