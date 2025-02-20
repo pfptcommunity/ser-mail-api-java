@@ -1,9 +1,9 @@
-package com.proofpoint.secureemailrelay.mail;
+package io.pfpt.secureemailrelay.mail;
 
-import javax.json.bind.Jsonb;
-import javax.json.bind.JsonbBuilder;
-import javax.json.bind.JsonbConfig;
-import javax.json.bind.annotation.JsonbProperty;
+import jakarta.json.bind.Jsonb;
+import jakarta.json.bind.JsonbBuilder;
+import jakarta.json.bind.JsonbConfig;
+import jakarta.json.bind.annotation.JsonbProperty;
 import java.util.Objects;
 import java.util.regex.Pattern;
 

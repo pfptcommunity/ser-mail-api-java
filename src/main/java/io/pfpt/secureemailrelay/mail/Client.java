@@ -1,9 +1,9 @@
-package com.proofpoint.secureemailrelay.mail;
+package io.pfpt.secureemailrelay.mail;
 
-import com.proofpoint.secureemailrelay.http.OAuthHttpClient;
+import io.pfpt.secureemailrelay.http.OAuthHttpClient;
 
-import javax.json.bind.Jsonb;
-import javax.json.bind.JsonbBuilder;
+import jakarta.json.bind.Jsonb;
+import jakarta.json.bind.JsonbBuilder;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;

@@ -1,14 +1,15 @@
-package test.com.proofpoint.secureemailrelay.mail;
+package test.io.pfpt.secureemailrelay.mail;
 
-import com.proofpoint.secureemailrelay.mail.*;
+import io.pfpt.secureemailrelay.mail.*;
+
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import javax.json.bind.Jsonb;
-import javax.json.bind.JsonbBuilder;
+import jakarta.json.bind.Jsonb;
+import jakarta.json.bind.JsonbBuilder;
 
 public class ConcurrencyTest {
   public static Map<String, String> loadConfig(String filePath) {
@@ -36,7 +37,7 @@ public class ConcurrencyTest {
               Message message =
                   new Message(
                       "This is a test email",
-                      new MailUser("ljerabek@proofpointdemo.us", "Joe Sender"));
+                      new MailUser("sender@example.com", "Joe Sender"));
 
               // Add text content body
               message.addContent(new Content("This is a test message", Content.ContentType.TEXT));

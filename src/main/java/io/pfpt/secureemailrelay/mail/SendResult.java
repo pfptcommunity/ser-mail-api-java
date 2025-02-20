@@ -1,7 +1,7 @@
-package com.proofpoint.secureemailrelay.mail;
+package io.pfpt.secureemailrelay.mail;
 
-import javax.json.bind.Jsonb;
-import javax.json.bind.JsonbBuilder;
+import jakarta.json.bind.Jsonb;
+import jakarta.json.bind.JsonbBuilder;
 import java.net.http.HttpResponse;
 import java.util.HashMap;
 import java.util.Map;

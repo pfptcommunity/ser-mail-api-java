@@ -1,13 +1,13 @@
-package com.proofpoint.secureemailrelay.mail;
+package io.pfpt.secureemailrelay.mail;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import javax.json.bind.Jsonb;
-import javax.json.bind.JsonbBuilder;
-import javax.json.bind.JsonbConfig;
-import javax.json.bind.annotation.JsonbProperty;
-import javax.json.bind.annotation.JsonbTransient;
+import jakarta.json.bind.Jsonb;
+import jakarta.json.bind.JsonbBuilder;
+import jakarta.json.bind.JsonbConfig;
+import jakarta.json.bind.annotation.JsonbProperty;
+import jakarta.json.bind.annotation.JsonbTransient;
 
 public final class Message {
   private static final Jsonb JSONB = JsonbBuilder.create(new JsonbConfig().withFormatting(true));

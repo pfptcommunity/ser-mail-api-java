@@ -1,7 +1,7 @@
-package com.proofpoint.secureemailrelay.http;
+package io.pfpt.secureemailrelay.http;
 
-import com.proofpoint.secureemailrelay.exceptions.HttpRequestException;
-import com.proofpoint.secureemailrelay.exceptions.HttpTokenRefreshException;
+import io.pfpt.secureemailrelay.exceptions.HttpRequestException;
+import io.pfpt.secureemailrelay.exceptions.HttpTokenRefreshException;
 import java.io.IOException;
 import java.io.StringReader;
 import java.net.URI;
@@ -13,10 +13,11 @@ import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReentrantLock;
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.json.JsonReader;
-import javax.json.stream.JsonParsingException;
+
+import jakarta.json.Json;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonReader;
+import jakarta.json.stream.JsonParsingException;
 
 public class OAuthHttpClient {
     private final HttpClient httpClient;

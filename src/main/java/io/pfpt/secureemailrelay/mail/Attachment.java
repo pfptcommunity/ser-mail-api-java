@@ -1,4 +1,4 @@
-package com.proofpoint.secureemailrelay.mail;
+package io.pfpt.secureemailrelay.mail;
 
 import java.io.File;
 import java.io.IOException;
@@ -6,12 +6,12 @@ import java.nio.file.Files;
 import java.util.Base64;
 import java.util.Objects;
 import java.util.UUID;
-import javax.json.bind.Jsonb;
-import javax.json.bind.JsonbBuilder;
-import javax.json.bind.JsonbConfig;
-import javax.json.bind.adapter.JsonbAdapter;
-import javax.json.bind.annotation.JsonbProperty;
-import javax.json.bind.annotation.JsonbTypeAdapter;
+import jakarta.json.bind.Jsonb;
+import jakarta.json.bind.JsonbBuilder;
+import jakarta.json.bind.JsonbConfig;
+import jakarta.json.bind.adapter.JsonbAdapter;
+import jakarta.json.bind.annotation.JsonbProperty;
+import jakarta.json.bind.annotation.JsonbTypeAdapter;
 
 public final class Attachment {
 

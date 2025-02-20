@@ -1,4 +1,4 @@
-package com.proofpoint.secureemailrelay.exceptions;
+package io.pfpt.secureemailrelay.exceptions;
 
 public class HttpTokenRefreshException extends Exception {
   public HttpTokenRefreshException(String message) {

@@ -1,4 +1,4 @@
-package com.proofpoint.secureemailrelay.mail;
+package io.pfpt.secureemailrelay.mail;
 
 import java.util.Collections;
 import java.util.Map;

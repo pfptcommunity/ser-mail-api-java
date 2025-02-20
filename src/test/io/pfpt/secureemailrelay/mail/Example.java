@@ -1,11 +1,12 @@
-package test.com.proofpoint.secureemailrelay.mail;
+package test.io.pfpt.secureemailrelay.mail;
 
-import com.proofpoint.secureemailrelay.mail.*;
+import io.pfpt.secureemailrelay.mail.*;
+
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Map;
-import javax.json.bind.Jsonb;
-import javax.json.bind.JsonbBuilder;
+import jakarta.json.bind.Jsonb;
+import jakarta.json.bind.JsonbBuilder;
 
 public class Example {
 
