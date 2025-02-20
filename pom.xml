@@ -38,11 +38,11 @@
     <distributionManagement>
         <snapshotRepository>
             <id>ossrh-publisher</id>
-            <url>https://publisher.sonatype.dev/v1/snapshots</url>
+            <url>https://central.sonatype.com/repository/maven-snapshots</url>
         </snapshotRepository>
         <repository>
             <id>ossrh-publisher</id>
-            <url>https://publisher.sonatype.dev/v1/maven</url>
+            <url>https://central.sonatype.com/api/v1/publisher/upload</url>
         </repository>
     </distributionManagement>
 
