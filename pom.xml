@@ -33,12 +33,12 @@
 
     <distributionManagement>
         <repository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+            <id>local-repo</id>
+            <url>file:///tmp/maven-test-repo/releases</url>
         </repository>
         <snapshotRepository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+            <id>local-repo</id>
+            <url>file:///tmp/maven-test-repo/snapshots</url>
         </snapshotRepository>
     </distributionManagement>
 
