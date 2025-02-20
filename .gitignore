@@ -30,7 +30,12 @@ bin/
 
 .idea/
 *.iml
+
+#Maven
 target/
+#maven-release-plugin
+release.properties
+pom.xml.releaseBackup
 
 # Ignore API key for test
 /ser.api_key
