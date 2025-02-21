@@ -126,7 +126,13 @@ public class OAuthHttpClient {
 
 
     /**
-     * Provides 1-to-1 usage with HttpClient send.
+     * Sends an HTTP request asynchronously and returns a CompletableFuture with the response.
+     * This method handles OAuth authentication and delegates the request to an underlying HTTP client.
+     *
+     * @param <T> the type of the response body, determined by the provided responseBodyHandler
+     * @param request the HTTP request to send, including headers and body if applicable
+     * @param responseBodyHandler the handler to convert the response body into the desired type T
+     * @return a CompletableFuture that completes with the HTTP response containing the processed body
      */
     public <T> CompletableFuture<HttpResponse<T>> sendAsync(HttpRequest request, HttpResponse.BodyHandler<T> responseBodyHandler) {
         try {
