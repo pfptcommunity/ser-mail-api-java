@@ -44,6 +44,6 @@ jobs:
 
       - name: Deploy to Maven Central
         env:
-          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+          MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
         run: |
           mvn clean deploy --batch-mode -DskipTests=true --settings ${{ github.workspace }}/settings.xml 
