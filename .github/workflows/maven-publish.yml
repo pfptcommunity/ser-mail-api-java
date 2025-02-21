@@ -20,6 +20,8 @@ jobs:
           server-id: central
           server-username: ${{ secrets.OSSRH_USER }}
           server-password: ${{ secrets.OSSRH_TOKEN }}
+          gpg-private-key: ${{ secrets.GPG_SECRET_KEY }} 
+          gpg-passphrase: ${{ secrets.GPG_SECRET_KEY_PASSPHRASE }}
           settings-path: ${{ github.workspace }}
 
       - name: Cache Maven packages
