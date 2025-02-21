@@ -34,7 +34,7 @@ jobs:
         id: extract_version
         run: |
           VERSION=${GITHUB_REF#refs/tags/v}
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
 
       - name: Set POM version
         run: |
@@ -49,32 +49,13 @@ jobs:
         run: |
           mvn clean deploy -DskipTests=true
 
-      - name: Upload Artifacts to GitHub Releases
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Upload JARs and Signatures to GitHub Releases
+        uses: softprops/action-gh-release@v2
         with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ./target/ser-mail-api-${{ env.VERSION }}.jar
-          asset_name: ser-mail-api-${{ env.VERSION }}.jar
-          asset_content_type: application/java-archive
-
-      - name: Upload Source JAR to GitHub Releases
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ./target/ser-mail-api-${{ env.VERSION }}-sources.jar
-          asset_name: ser-mail-api-${{ env.VERSION }}-sources.jar
-          asset_content_type: application/java-archive
-
-      - name: Upload Javadoc JAR to GitHub Releases
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ./target/ser-mail-api-${{ env.VERSION }}-javadoc.jar
-          asset_name: ser-mail-api-${{ env.VERSION }}-javadoc.jar
-          asset_content_type: application/java-archive
+          files: |
+            ./target/ser-mail-api-${{ env.VERSION }}.jar
+            ./target/ser-mail-api-${{ env.VERSION }}.jar.asc
+            ./target/ser-mail-api-${{ env.VERSION }}-sources.jar
+            ./target/ser-mail-api-${{ env.VERSION }}-sources.jar.asc
+            ./target/ser-mail-api-${{ env.VERSION }}-javadoc.jar
+            ./target/ser-mail-api-${{ env.VERSION }}-javadoc.jar.asc
