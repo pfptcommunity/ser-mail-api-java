@@ -21,7 +21,7 @@ jobs:
           server-username: ${{ secrets.OSSRH_USER }}
           server-password: ${{ secrets.OSSRH_TOKEN }}
           gpg-private-key: ${{ secrets.GPG_KEY }}
-          gpg-passphrase: ${{ secrets.GPG_PASSPHRASE }}  # Still needed for GPG setup
+          gpg-passphrase: ${{ secrets.GPG_PASSPHRASE }} 
           settings-path: ${{ github.workspace }}
 
       - name: Cache Maven packages
@@ -47,4 +47,4 @@ jobs:
           MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}  # Set as env variable
         run: |
           mvn clean deploy -U \
-            --settings ${{ github.workspace }}/settings.xml
+            --settings ${{ github.workspace }}/settings.xml -e -X
