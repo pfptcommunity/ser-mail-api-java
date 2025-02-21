@@ -2,18 +2,16 @@ name: Deploy to Maven Central
 
 on:
   release:
-    types: [published]  # Runs when a release is published
+    types: [published]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
+    
     steps:
-      # Checkout the code
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Set up JDK with authentication and GPG
       - name: Set up JDK 11 with Token Authentication
         uses: actions/setup-java@v4
         with:
@@ -23,10 +21,9 @@ jobs:
           server-username: ${{ secrets.OSSRH_USER }}
           server-password: ${{ secrets.OSSRH_TOKEN }}
           gpg-private-key: ${{ secrets.GPG_KEY }}
-          gpg-passphrase: ${{ secrets.GPG_PASSPHRASE }}
+          gpg-passphrase: ${{ secrets.GPG_PASSPHRASE }}  # Still needed for GPG setup
           settings-path: ${{ github.workspace }}
 
-      # Cache Maven dependencies
       - name: Cache Maven packages
         uses: actions/cache@v3
         with:
@@ -34,23 +31,20 @@ jobs:
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
 
-      # Extract version from release tag (removes 'v' prefix)
       - name: Extract version
         id: extract_version
         run: |
           VERSION=${GITHUB_REF#refs/tags/v}
-          echo "VERSION=$VERSION" >> $GITHUB_ENV  # Set as environment variable
-        shell: bash
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
 
-      # Set version in pom.xml
       - name: Set POM version
         run: |
           mvn versions:set -DnewVersion=${{ env.VERSION }} -DgenerateBackupPoms=false
-          mvn versions:commit  # Removes any backup POMs if generated
+          mvn versions:commit
 
-      # Deploy to Maven Central
       - name: Deploy to Maven Central
+        env:
+          MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}  # Set as env variable
         run: |
           mvn clean deploy -U \
-            -Dgpg.passphrase="${{ secrets.GPG_PASSPHRASE }}" \
             --settings ${{ github.workspace }}/settings.xml
