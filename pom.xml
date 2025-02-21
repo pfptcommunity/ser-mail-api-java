@@ -5,7 +5,7 @@
 
     <groupId>io.pfpt.ser</groupId>
     <artifactId>ser-mail-api</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>0.0.1</version>
     <packaging>jar</packaging>
 
     <name>Proofpoint Secure Email Relay Mail API Java Library</name>
@@ -66,7 +66,7 @@
 
     <build>
         <plugins>
-            <!-- Source JAR
+            <!-- Source JAR -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
@@ -80,8 +80,7 @@
                     </execution>
                 </executions>
             </plugin>
--->
-            <!-- Javadoc JAR
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
@@ -95,7 +94,6 @@
                     </execution>
                 </executions>
             </plugin>
-            -->
 
             <!-- GPG Signing -->
             <plugin>
@@ -111,13 +109,10 @@
                         </goals>
                     </execution>
                 </executions>
-                <configuration>
-                    <keyname>51C6DC6B841EB51DD391607DFE518FE73E08F358</keyname> <!-- Reference a property -->
-                </configuration>
             </plugin>
 
             <!-- Central Publishing Plugin -->
-            <!--
+
             <plugin>
                 <groupId>org.sonatype.central</groupId>
                 <artifactId>central-publishing-maven-plugin</artifactId>
@@ -125,25 +120,7 @@
                 <extensions>true</extensions>
                 <configuration>
                     <publishingServerId>central</publishingServerId>
-                    <autoPublish>true</autoPublish>
-                </configuration>
-            </plugin>
--->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-deploy-plugin</artifactId>
-                <version>3.1.2</version>
-                <executions>
-                    <execution>
-                        <id>default-deploy</id>
-                        <phase>deploy</phase>
-                        <goals>
-                            <goal>deploy</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <skip>false</skip>
+                    <autoPublish>false</autoPublish>
                 </configuration>
             </plugin>
         </plugins>
