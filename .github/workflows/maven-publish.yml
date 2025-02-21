@@ -21,7 +21,7 @@ jobs:
           server-username: OSSRH_USER
           server-password: OSSRH_TOKEN
           gpg-private-key: ${{ secrets.GPG_KEY }} 
-          gpg-passphrase: ${{ secrets.GPG_PASSPHRASE }}
+          gpg-passphrase: MAVEN_GPG_PASSPHRASE
           settings-path: ${{ github.workspace }}
                     
       - name: Cache Maven packages
