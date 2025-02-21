@@ -1,4 +1,6 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>io.pfpt.ser</groupId>
@@ -35,17 +37,6 @@
         <url>https://github.com/pfptcommunity/ser-mail-api-java</url>
     </scm>
 
-    <distributionManagement>
-        <snapshotRepository>
-            <id>ossrh-publisher</id>
-            <url>https://central.sonatype.com/api/v1/publish/maven/snapshots</url>
-        </snapshotRepository>
-        <repository>
-            <id>ossrh-publisher</id>
-            <url>https://central.sonatype.com/api/v1/publish/maven/releases</url>
-        </repository>
-    </distributionManagement>
-
     <dependencies>
         <dependency>
             <groupId>jakarta.json</groupId>
@@ -73,25 +64,90 @@
 
     <build>
         <plugins>
+            <!-- Source JAR -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.13.0</version>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>3.3.0</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Javadoc JAR
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.6.3</version>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            -->
+
+            <!-- GPG Signing -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <version>3.2.4</version>
+                <executions>
+                    <execution>
+                        <id>sign-artifacts</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>sign</goal>
+                        </goals>
+                    </execution>
+                </executions>
                 <configuration>
-                    <source>11</source>
-                    <target>11</target>
+                    <keyname>51C6DC6B841EB51DD391607DFE518FE73E08F358</keyname> <!-- Reference a property -->
                 </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>3.4.2</version>
-                <configuration>
-                    <excludes>
-                        <exclude>**/test/**</exclude>
-                    </excludes>
-                </configuration>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>3.1.0</version>
+                <executions>
+                    <execution>
+                        <id>rename-snapshot</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <tstamp>
+                                    <format property="snapshot.timestamp" pattern="yyyyMMdd.HHmmss"/>
+                                </tstamp>
+                                <move file="${project.build.directory}/${project.artifactId}-${project.version}.jar"
+                                      tofile="${project.build.directory}/${project.artifactId}-${project.version}-${snapshot.timestamp}-1.jar"/>
+                                <move file="${project.build.directory}/${project.artifactId}-${project.version}.jar.asc"
+                                      tofile="${project.build.directory}/${project.artifactId}-${project.version}-${snapshot.timestamp}-1.jar.asc"/>
+                                <move file="${project.build.directory}/${project.artifactId}-${project.version}-sources.jar"
+                                      tofile="${project.build.directory}/${project.artifactId}-${project.version}-${snapshot.timestamp}-1-sources.jar"/>
+                                <move file="${project.build.directory}/${project.artifactId}-${project.version}-sources.jar.asc"
+                                      tofile="${project.build.directory}/${project.artifactId}-${project.version}-${snapshot.timestamp}-1-sources.jar.asc"/>
+                                <move file="${project.build.directory}/${project.artifactId}-${project.version}.pom"
+                                      tofile="${project.build.directory}/${project.artifactId}-${project.version}-${snapshot.timestamp}-1.pom"/>
+                                <move file="${project.build.directory}/${project.artifactId}-${project.version}.pom.asc"
+                                      tofile="${project.build.directory}/${project.artifactId}-${project.version}-${snapshot.timestamp}-1.pom.asc"/>
+                            </target>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
+
+            <!-- Central Publishing Plugin -->
             <plugin>
                 <groupId>org.sonatype.central</groupId>
                 <artifactId>central-publishing-maven-plugin</artifactId>
@@ -99,8 +155,20 @@
                 <extensions>true</extensions>
                 <configuration>
                     <publishingServerId>central</publishingServerId>
+                    <autoPublish>true</autoPublish> <!-- Optional: auto-publishes after upload -->
                 </configuration>
             </plugin>
         </plugins>
     </build>
+
+    <distributionManagement>
+        <snapshotRepository>
+            <id>central</id>
+            <url>https://central.sonatype.com/api/v1/publish/maven/snapshots</url>
+        </snapshotRepository>
+        <repository>
+            <id>central</id>
+            <url>https://central.sonatype.com/api/v1/publish/maven/releases</url>
+        </repository>
+    </distributionManagement>
 </project>
