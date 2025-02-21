@@ -47,4 +47,4 @@ jobs:
           MAVEN_GPG_KEY: ${{ secrets.GPG_SECRET_KEY }}
           MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_SECRET_KEY_PASSPHRASE }}
         run: |
-          mvn deploy --batch-mode -DskipTests=true --settings ${{ github.workspace }}/settings.xml 
+          mvn clean deploy --batch-mode -DskipTests=true --settings ${{ github.workspace }}/settings.xml 
