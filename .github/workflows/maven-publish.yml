@@ -22,7 +22,7 @@ jobs:
           server-password: OSSRH_TOKEN
           gpg-private-key: ${{ secrets.GPG_KEY }} 
           gpg-passphrase: MAVEN_GPG_PASSPHRASE
-          settings-path: ${{ github.workspace }}
+          #settings-path: ${{ github.workspace }}
                     
       - name: Cache Maven packages
         uses: actions/cache@v3
@@ -61,4 +61,4 @@ jobs:
           OSSRH_USER: ${{ secrets.OSSRH_USER }}
           OSSRH_TOKEN: ${{ secrets.OSSRH_TOKEN }}
         run: |
-          mvn clean deploy -U --batch-mode -DskipTests=true
+          mvn clean deploy -DskipTests=true
