@@ -16,7 +16,7 @@ You can include the library in your project using **Maven**:
 <dependency>
     <groupId>io.pfpt.ser</groupId>
     <artifactId>ser-mail-api</artifactId>
-    <version>0.0.1</version>
+    <version>0.0.0</version>
 </dependency>
 ```
 
