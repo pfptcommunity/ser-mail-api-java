@@ -1,4 +1,5 @@
 # Proofpoint Secure Email Relay Mail API Java Library
+![Maven Central Version](https://img.shields.io/maven-central/v/io.pfpt.ser/ser-mail-api)
 
 This library implements all the functions of the SER Email Relay API via **Java**.
 
