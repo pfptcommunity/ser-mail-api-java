@@ -41,6 +41,9 @@ jobs:
         run: |
           mvn versions:set -DnewVersion=${{ env.VERSION }} -DgenerateBackupPoms=false
           mvn versions:commit
+          
+      - name: List Secrets
+        run: gpg --list-secret-keys --keyid-format LONG
 
       - name: Deploy to Maven Central
         env:
@@ -48,4 +51,4 @@ jobs:
           OSSRH_USER: ${{ secrets.OSSRH_USER }}
           OSSRH_TOKEN: ${{ secrets.OSSRH_TOKEN }}
         run: |
-          mvn clean deploy -U --batch-mode -Dusername=${{ env.OSSRH_USER }} -Dpassword=${{ env.OSSRH_TOKEN }} -DskipTests=true --settings ${{ github.workspace }}/settings.xml
+          mvn clean deploy -U --batch-mode -Dusername=${{ env.OSSRH_USER }} -Dpassword=${{ env.OSSRH_TOKEN }} -DskipTests=true --settings ${{ github.workspace }}/settings.xml -e -X
