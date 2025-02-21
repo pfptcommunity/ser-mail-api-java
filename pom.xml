@@ -27,6 +27,8 @@
     </developers>
 
     <properties>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     </properties>
@@ -64,7 +66,7 @@
 
     <build>
         <plugins>
-            <!-- Source JAR -->
+            <!-- Source JAR
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
@@ -78,7 +80,7 @@
                     </execution>
                 </executions>
             </plugin>
-
+-->
             <!-- Javadoc JAR
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -113,41 +115,9 @@
                     <keyname>51C6DC6B841EB51DD391607DFE518FE73E08F358</keyname> <!-- Reference a property -->
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <version>3.1.0</version>
-                <executions>
-                    <execution>
-                        <id>rename-snapshot</id>
-                        <phase>verify</phase>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                        <configuration>
-                            <target>
-                                <tstamp>
-                                    <format property="snapshot.timestamp" pattern="yyyyMMdd.HHmmss"/>
-                                </tstamp>
-                                <move file="${project.build.directory}/${project.artifactId}-${project.version}.jar"
-                                      tofile="${project.build.directory}/${project.artifactId}-${project.version}-${snapshot.timestamp}-1.jar"/>
-                                <move file="${project.build.directory}/${project.artifactId}-${project.version}.jar.asc"
-                                      tofile="${project.build.directory}/${project.artifactId}-${project.version}-${snapshot.timestamp}-1.jar.asc"/>
-                                <move file="${project.build.directory}/${project.artifactId}-${project.version}-sources.jar"
-                                      tofile="${project.build.directory}/${project.artifactId}-${project.version}-${snapshot.timestamp}-1-sources.jar"/>
-                                <move file="${project.build.directory}/${project.artifactId}-${project.version}-sources.jar.asc"
-                                      tofile="${project.build.directory}/${project.artifactId}-${project.version}-${snapshot.timestamp}-1-sources.jar.asc"/>
-                                <move file="${project.build.directory}/${project.artifactId}-${project.version}.pom"
-                                      tofile="${project.build.directory}/${project.artifactId}-${project.version}-${snapshot.timestamp}-1.pom"/>
-                                <move file="${project.build.directory}/${project.artifactId}-${project.version}.pom.asc"
-                                      tofile="${project.build.directory}/${project.artifactId}-${project.version}-${snapshot.timestamp}-1.pom.asc"/>
-                            </target>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
 
             <!-- Central Publishing Plugin -->
+            <!--
             <plugin>
                 <groupId>org.sonatype.central</groupId>
                 <artifactId>central-publishing-maven-plugin</artifactId>
@@ -155,7 +125,25 @@
                 <extensions>true</extensions>
                 <configuration>
                     <publishingServerId>central</publishingServerId>
-                    <autoPublish>true</autoPublish> <!-- Optional: auto-publishes after upload -->
+                    <autoPublish>true</autoPublish>
+                </configuration>
+            </plugin>
+-->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <version>3.1.2</version>
+                <executions>
+                    <execution>
+                        <id>default-deploy</id>
+                        <phase>deploy</phase>
+                        <goals>
+                            <goal>deploy</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <skip>false</skip>
                 </configuration>
             </plugin>
         </plugins>
