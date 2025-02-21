@@ -18,10 +18,10 @@ jobs:
           java-version: '11'
           distribution: 'temurin'
           server-id: central
-          server-username: MAVEN_USERNAME
-          server-password: MAVEN_CENTRAL_TOKEN
+          server-username: ${{ secrets.OSSRH_USER }}
+          server-password: ${{ secrets.OSSRH_TOKEN }}
           gpg-private-key: ${{ secrets.GPG_SECRET_KEY }} 
-          gpg-passphrase: MAVEN_GPG_PASSPHRASE
+          gpg-passphrase: ${{ secrets.GPG_PASSPHRASE }}
           settings-path: ${{ github.workspace }}
 
       - name: Cache Maven packages
@@ -41,6 +41,9 @@ jobs:
         run: |
           mvn versions:set -DnewVersion=${{ env.VERSION }} -DgenerateBackupPoms=false
           mvn versions:commit
+
+      - name: List Secrets
+        run: gpg --list-secret-keys --keyid-format LONG
 
       - name: Deploy to Maven Central
         env:
