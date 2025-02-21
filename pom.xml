@@ -5,7 +5,7 @@
 
     <groupId>io.pfpt.ser</groupId>
     <artifactId>ser-mail-api</artifactId>
-    <version>0.0.1</version>
+    <version>0.0.0</version>
     <packaging>jar</packaging>
 
     <name>Proofpoint Secure Email Relay Mail API Java Library</name>
