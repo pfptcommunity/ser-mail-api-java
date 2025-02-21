@@ -21,15 +21,7 @@ jobs:
           server-username: ${{ secrets.OSSRH_USER }}
           server-password: ${{ secrets.OSSRH_TOKEN }}
           settings-path: ${{ github.workspace }}
-          
-      - name: Import GPG Key
-        env:
-          GPG_SECRET_KEY: ${{ secrets.GPG_SECRET_KEY }}
-          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
-        run: |
-          echo "$GPG_SECRET_KEY" | gpg --batch --yes --passphrase "$GPG_PASSPHRASE" --import
-          gpg --list-secret-keys  # Verify key is imported
-          
+                    
       - name: Cache Maven packages
         uses: actions/cache@v3
         with:
