@@ -45,6 +45,16 @@ jobs:
       - name: List Secrets
         run: gpg --list-secret-keys --keyid-format LONG
 
+      - name: Debug github.workspace
+        run: |
+          echo "github.workspace is: ${{ github.workspace }}"
+          ls -la ${{ github.workspace }}
+
+      - name: Dump settings.xml contents
+        run: |
+          echo "Dumping contents of settings.xml:"
+          cat ${{ github.workspace }}/settings.xml || echo "settings.xml not found!"
+
       - name: Deploy to Maven Central
         env:
           MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
