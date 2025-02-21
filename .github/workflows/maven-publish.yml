@@ -20,6 +20,8 @@ jobs:
           server-id: central
           server-username: ${{ secrets.OSSRH_USER }}
           server-password: ${{ secrets.OSSRH_TOKEN }}
+          gpg-private-key: ${{ secrets.GPG_KEY }} 
+          gpg-passphrase: ${{ secrets.GPG_PASSPHRASE }}
           settings-path: ${{ github.workspace }}
                     
       - name: Cache Maven packages
@@ -42,6 +44,6 @@ jobs:
 
       - name: Deploy to Maven Central
         env:
-          MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
         run: |
           mvn clean deploy --batch-mode -DskipTests=true --settings ${{ github.workspace }}/settings.xml 
