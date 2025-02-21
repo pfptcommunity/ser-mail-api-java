@@ -53,5 +53,4 @@ jobs:
         run: |
           mvn clean deploy -U \
             -Dgpg.passphrase="${{ secrets.GPG_PASSPHRASE }}" \
-            -P release \
             --settings ${{ github.workspace }}/settings.xml
