@@ -18,8 +18,8 @@ jobs:
           java-version: '11'
           distribution: 'temurin'
           server-id: central
-          server-username: ${{ secrets.OSSRH_USER }}
-          server-password: ${{ secrets.OSSRH_TOKEN }}
+          server-username: OSSRH_USER
+          server-password: OSSRH_TOKEN
           gpg-private-key: ${{ secrets.GPG_KEY }} 
           gpg-passphrase: ${{ secrets.GPG_PASSPHRASE }}
           settings-path: ${{ github.workspace }}
@@ -58,5 +58,7 @@ jobs:
       - name: Deploy to Maven Central
         env:
           MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+          OSSRH_USER: ${{ secrets.OSSRH_USER }}
+          OSSRH_TOKEN: ${{ secrets.OSSRH_TOKEN }}
         run: |
           mvn clean deploy -U --batch-mode -DskipTests=true
