@@ -45,5 +45,7 @@ jobs:
       - name: Deploy to Maven Central
         env:
           MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+          OSSRH_USER: ${{ secrets.OSSRH_USER }}
+          OSSRH_TOKEN: ${{ secrets.OSSRH_TOKEN }}
         run: |
-          mvn clean deploy --batch-mode -DskipTests=true --settings ${{ github.workspace }}/settings.xml 
+          mvn clean deploy --batch-mode -Dusername=${{env.OSSRH_USER}} -Dpassword=${{env.OSSRH_TOKEN}} -DskipTests=true --settings ${{ github.workspace }}/settings.xml
