@@ -57,7 +57,7 @@ public class SimpleExample {
 
     // Create an inline attachment from a file on disk, setting its content ID to "logo"
     message.addAttachment(
-            Attachment.builder().fromFile("C:/temp/logo.png").dispositionInline("logo").build());
+            Attachment.builder().fromFile("C:/temp/logo_a.png").dispositionInline("logo").build());
 
     // Add primary recipients (To field)
     message.addTo(new MailUser("recipient1@example.com", "Recipient 1"));
@@ -79,10 +79,10 @@ public class SimpleExample {
             Attachment.builder().fromBytes(new byte[] {1, 2, 3}, "bytes.txt").build()); // Byte array
 
     // Set the header "From" field to override the sender in the email headers
-    message.setHeaderFrom(new MailUser("fancysender@proofpoint.com", "Header From"));
+    message.setHeaderFrom(new MailUser("fancysender@example.com", "Header From"));
 
     // Set a Reply-To address
-    message.addReplyTo(new MailUser("noreply@proofpoint.com", "No Reply"));
+    message.addReplyTo(new MailUser("noreply@example.com", "No Reply"));
 
     // Print the JSON representation of the Message for debugging
     System.out.println(message);

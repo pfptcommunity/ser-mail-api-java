@@ -75,7 +75,7 @@ public class ConcurrencyExample {
                   // Add an inline attachment from a file, setting its content ID to "logo"
                   message.addAttachment(
                           Attachment.builder()
-                                  .fromFile("C:/temp/logo.png")
+                                  .fromFile("C:/temp/logo_a.png")
                                   .dispositionInline("logo")
                                   .build());
 
@@ -99,8 +99,11 @@ public class ConcurrencyExample {
                   message.addAttachment(
                           Attachment.builder().fromBytes(new byte[] {1, 2, 3}, "bytes.txt").build()); // Byte array
 
+                  // Set the header "From" field to override the sender in the email headers
+                  message.setHeaderFrom(new MailUser("fancysender@example.com", "Header From"));
+
                   // Set a Reply-To address
-                  message.addReplyTo(new MailUser("noreply@proofpoint.com", "No Reply"));
+                  message.addReplyTo(new MailUser("noreply@example.com", "No Reply"));
 
                   // Send the message asynchronously and wait for the result
                   SendResult sendResult = client.send(message).join();

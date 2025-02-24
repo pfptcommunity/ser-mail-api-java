@@ -59,24 +59,34 @@ public class ConcurrencyExampleFluent {
                             // Capture the current thread ID for logging
                             long tid = Thread.currentThread().getId();
 
-                            // Construct a Message using the fluent builder pattern
+                            // Construct logo_a attachment with dynamic content ID
+                            var logo_b = Attachment.builder()
+                                    .fromFile("c:/temp/logo_b.png") // Load logo_b from file
+                                    .dispositionInline() // Set dynamic content ID
+                                    .build();
+
+                            // Use the fluent builder to construct the Message in a single chain
                             Message message = Message.builder()
-                                    .subject("This is a test email") // Required: Sets the email subject
-                                    .from(new MailUser("sender@example.com", "Joe Sender")) // Required: Sets the sender
-                                    .addContent(new Content("This is a test message", Content.ContentType.TEXT)) // Required: Adds plain text content
-                                    .addContent(new Content("<b>This is a test message</b><br><img src=\"cid:logo\">", Content.ContentType.HTML)) // Adds HTML content with embedded image
-                                    .addAttachment(Attachment.builder().fromFile("C:/temp/logo.png").dispositionInline("logo").build()) // Adds an inline attachment with content ID "logo"
-                                    .addTo(new MailUser("recipient1@example.com", "Recipient 1")) // Required: Adds a primary recipient
+                                    .subject("This is a test email") // Sets the email subject (required)
+                                    .from(new MailUser("sender@example.com", "Joe Sender")) // Sets the sender (required)
+                                    .addContent(new Content("This is a test message", Content.ContentType.TEXT)) // Adds plain text content (required minimum)
+                                    .addContent(new Content( // Required: Adds HTML content referencing both static and dynamic CIDs
+                                            "<b>Static CID</b><br><img src=\"cid:logo\"><br><b>Dynamic CID</b><br><img src=\"cid:" + logo_b.getContentId() + "\">",
+                                            Content.ContentType.HTML)) // Uses logo_b's auto-assigned content ID retrieved from getContentId()
+                                    .addAttachment(Attachment.builder().fromFile("C:/temp/logo_a.png").dispositionInline("logo").build()) // Adds an inline attachment with content ID "logo"
+                                    .addAttachment(logo_b) // Adds logo_b with its dynamically assigned content ID
+                                    .addTo(new MailUser("recipient1@example.com", "Recipient 1")) // Adds a primary recipient (required minimum)
                                     .addTo(new MailUser("recipient2@example.com", "Recipient 2")) // Adds a second primary recipient
                                     .addCc(new MailUser("cc1@example.com", "CC Recipient 1")) // Adds a CC recipient
                                     .addCc(new MailUser("cc2@example.com", "CC Recipient 2")) // Adds a second CC recipient
                                     .addBcc(new MailUser("bcc1@example.com", "BCC Recipient 1")) // Adds a BCC recipient
                                     .addBcc(new MailUser("bcc2@example.com", "BCC Recipient 2")) // Adds a second BCC recipient
                                     .addAttachment(Attachment.builder().fromBase64("VGhpcyBpcyBhIHRlc3Qh", "test.txt").build()) // Adds an attachment from Base64-encoded text
-                                    .addAttachment(Attachment.builder().fromBase64("VGhpcyBpcyBhIHRlc3Qh", "test.txt").build()) // Adds a duplicate Base64 attachment
+                                    .addAttachment(Attachment.builder().fromFile("C:/temp/file.csv").build()) // Adds an attachment from a file
                                     .addAttachment(Attachment.builder().fromBytes(new byte[] {1, 2, 3}, "bytes.txt").build()) // Adds an attachment from a byte array
-                                    .addReplyTo(new MailUser("noreply@proofpoint.com", "No Reply")) // Sets a Reply-To address
-                                    .build(); // Constructs the Message, enforcing required fields
+                                    .headerFrom(new MailUser("fancysender@example.com", "Header From")) // Sets the header "From" field
+                                    .addReplyTo(new MailUser("noreply@example.com", "No Reply")) // Sets a Reply-To address
+                                    .build(); // Constructs the Message, enforcing required fields (from, tos, subject, content)
 
                             // Send the message asynchronously and wait for the result
                             SendResult sendResult = client.send(message).join();
