@@ -169,7 +169,7 @@ Message message = Message.builder()
         .build();
 ```
 
-### Concurrency Example
+## Concurrency Example
 ```java
 ExecutorService executorService = Executors.newFixedThreadPool(10);
 Client client = new Client("<client_id>", "<client_secret>");
