@@ -1,18 +1,16 @@
-package io.pfpt.ser.mail;
-
-import java.io.File;
+import io.pfpt.ser.mail.*;
+import jakarta.json.bind.Jsonb;
+import jakarta.json.bind.JsonbBuilder;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Map;
-import jakarta.json.bind.Jsonb;
-import jakarta.json.bind.JsonbBuilder;
 
 /**
  * An example demonstrating email sending using the Proofpoint SER API with a fluent builder. This
  * class constructs a Message object using the modern builder pattern, showcasing a concise and
  * readable approach to email creation with build-time validation.
  */
-public class SimpleExampleFluent {
+public class AdvancedExample {
 
   /**
    * Loads configuration from a JSON file into a Map. Reads client credentials (e.g., client_id,

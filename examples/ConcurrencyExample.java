@@ -14,7 +14,7 @@ import java.util.concurrent.TimeUnit;
  * builder. This class uses a thread pool to send multiple emails simultaneously, constructing each
  * Message with the fluent builder pattern for clarity and build-time validation.
  */
-public class ConcurrencyExampleFluent {
+public class ConcurrencyExample {
 
   /**
    * Loads configuration from a JSON file into a Map. Reads client credentials (e.g., client_id,
