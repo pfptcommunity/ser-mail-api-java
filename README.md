@@ -36,6 +36,38 @@ You can include the library in your project using **Maven**:
 - **Reply Management**: Add `Reply-To` addresses to redirect replies.
 
 ## Quick Start
+```java
+import io.pfpt.ser.mail.*;
+
+public class Example {
+  public static void main(String[] args) {
+    // Initialize the Client with OAuth credentials from the config
+    Client client = new Client("<client_id>", "<client_secret>");
+    
+    // Use the fluent builder to construct the Message in a single chain
+    Message message = Message.builder()
+            .subject("This is a test email") // Sets the email subject (required)
+            .from(new MailUser("sender@example.com", "Joe Sender")) // Sets the sender (required)
+            .addContent(new Content("This is a test message", Content.ContentType.TEXT)) // Adds plain text content (required minimum)
+            .addTo(new MailUser("recipient1@example.com", "Recipient 1")) // Adds a primary recipient (required minimum)
+            .build(); // Constructs the Message, enforcing required fields (from, tos, subject, content)
+    
+    // Send the message asynchronously and wait for the result
+    SendResult sendResult = client.send(message).join();
+    
+    // Output the HTTP status code from the API response
+    System.out.println("HTTP Status: " + sendResult.getHttpResponse().statusCode());
+    // Output the message ID from the API response
+    System.out.println("Message ID: " + sendResult.getMessageId());
+    // Output the reason (if any) from the API response
+    System.out.println("Reason: " + sendResult.getReason());
+    // Output the request ID from the API response
+    System.out.println("Request ID: " + sendResult.getRequestId());
+  }
+}
+```
+
+## Advanced Emails
 
 ```java
 import io.pfpt.ser.mail.*;
@@ -73,12 +105,10 @@ public class Example {
             .headerFrom(new MailUser("fancysender@example.com", "Header From")) // Sets the header "From" field
             .addReplyTo(new MailUser("noreply@example.com", "No Reply")) // Sets a Reply-To address
             .build(); // Constructs the Message, enforcing required fields (from, tos, subject, content)
-
-    // Print the JSON representation of the Message for debugging
-    System.out.println(message);
-
+    
     // Send the message asynchronously and wait for the result
     SendResult sendResult = client.send(message).join();
+    
     // Output the HTTP status code from the API response
     System.out.println("HTTP Status: " + sendResult.getHttpResponse().statusCode());
     // Output the message ID from the API response
