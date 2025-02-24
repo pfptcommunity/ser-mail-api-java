@@ -43,14 +43,14 @@ public class Example {
   public static void main(String[] args) {
     // Initialize the Client with OAuth credentials from the config
     Client client = new Client("<client_id>", "<client_secret>");
-    
-    // Use the fluent builder to construct the Message in a single chain
+
+    // Use the fluent builder to construct and send an email
     Message message = Message.builder()
-            .subject("This is a test email") // Sets the email subject (required)
-            .from(new MailUser("sender@example.com", "Joe Sender")) // Sets the sender (required)
-            .addContent(new Content("This is a test message", Content.ContentType.TEXT)) // Adds plain text content (required minimum)
-            .addTo(new MailUser("recipient1@example.com", "Recipient 1")) // Adds a primary recipient (required minimum)
-            .build(); // Constructs the Message, enforcing required fields (from, tos, subject, content)
+            .subject("This is a test email") 
+            .from(new MailUser("sender@example.com", "Joe Sender")) 
+            .addContent(new Content("This is a test message", Content.ContentType.TEXT))
+            .addTo(new MailUser("recipient1@example.com", "Recipient 1")) 
+            .build();
     
     // Send the message asynchronously and wait for the result
     SendResult sendResult = client.send(message).join();
