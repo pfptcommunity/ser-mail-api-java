@@ -5,15 +5,29 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * A default implementation of the IMimeMapper interface for mapping file extensions to MIME types.
+ * This class provides thread-safe operations for retrieving, validating, and managing MIME type mappings.
+ */
 public final class DefaultMimeMapper implements IMimeMapper {
+  // Thread-safe map storing file extensions to MIME type mappings
   private final Map<String, String> mimeTypeMap;
+  // Thread-safe set of all known MIME types
   private final Set<String> mimeTypes;
+  // Synchronization lock for thread-safe operations
   private final Object lock = new Object();
 
+  // Default MIME type used when no specific mapping is found and fallback is allowed
   private String defaultMimeType;
+  // Flag to allow fallback to default MIME type if no mapping exists
   private boolean allowFallbackMimeType;
+  // Flag to allow unknown MIME types not in the predefined set
   private boolean allowUnknownMimeType;
 
+  /**
+   * Constructs a DefaultMimeMapper with a predefined set of extension-to-MIME-type mappings.
+   * Initializes with a default MIME type and settings for fallback and unknown MIME type handling.
+   */
   public DefaultMimeMapper() {
     this.defaultMimeType = "application/octet-stream";
     this.allowFallbackMimeType = false;
@@ -1019,16 +1033,23 @@ public final class DefaultMimeMapper implements IMimeMapper {
     this.mimeTypes.addAll(map.values());
   }
 
+  /**
+   * Retrieves the MIME type for a given file name based on its extension.
+   *
+   * @param fileName the name of the file to determine the MIME type for
+   * @return the corresponding MIME type
+   * @throws IllegalArgumentException if the file name is invalid or no MIME type is found and fallback is disabled
+   */
   public String getMimeType(String fileName) {
     if (fileName == null || fileName.isBlank()) {
       throw new IllegalArgumentException(
-          "File name must not be null, empty, or contain only whitespace.");
+              "File name must not be null, empty, or contain only whitespace.");
     }
 
     String extension = getFileExtension(fileName);
     if (extension.isEmpty()) {
       throw new IllegalArgumentException(
-          "File extension could not be determined from '" + fileName + "'.");
+              "File extension could not be determined from '" + fileName + "'.");
     }
 
     synchronized (lock) {
@@ -1041,16 +1062,23 @@ public final class DefaultMimeMapper implements IMimeMapper {
       }
 
       throw new IllegalArgumentException(
-          "MIME type could not be determined for '"
-              + fileName
-              + "'. Provide a MIME type explicitly or enable fallback.");
+              "MIME type could not be determined for '"
+                      + fileName
+                      + "'. Provide a MIME type explicitly or enable fallback.");
     }
   }
 
+  /**
+   * Checks if a given MIME type is valid according to the known set or configuration.
+   *
+   * @param mimeType the MIME type to validate
+   * @return true if the MIME type is valid, false otherwise
+   * @throws IllegalArgumentException if the MIME type is null, empty, or only whitespace
+   */
   public boolean isValidMimeType(String mimeType) {
     if (mimeType == null || mimeType.isBlank()) {
       throw new IllegalArgumentException(
-          "MIME type must not be null, empty, or contain only whitespace.");
+              "MIME type must not be null, empty, or contain only whitespace.");
     }
 
     synchronized (lock) {
@@ -1058,14 +1086,22 @@ public final class DefaultMimeMapper implements IMimeMapper {
     }
   }
 
+  /**
+   * Adds or updates a MIME type mapping for a given file extension.
+   *
+   * @param extension the file extension (e.g., "pdf")
+   * @param mimeType the MIME type to associate with the extension (e.g., "application/pdf")
+   * @return true if this is a new entry, false if it updates an existing one
+   * @throws IllegalArgumentException if extension or MIME type is null, empty, or only whitespace
+   */
   public boolean addOrUpdateMimeType(String extension, String mimeType) {
     if (extension == null || extension.isBlank()) {
       throw new IllegalArgumentException(
-          "Extension must not be null, empty, or contain only whitespace.");
+              "Extension must not be null, empty, or contain only whitespace.");
     }
     if (mimeType == null || mimeType.isBlank()) {
       throw new IllegalArgumentException(
-          "MIME type must not be null, empty, or contain only whitespace.");
+              "MIME type must not be null, empty, or contain only whitespace.");
     }
 
     extension = extension.trim().toLowerCase();
@@ -1083,39 +1119,80 @@ public final class DefaultMimeMapper implements IMimeMapper {
     }
   }
 
+  /**
+   * Retrieves an unmodifiable copy of the current MIME type mappings.
+   *
+   * @return a map of file extensions to MIME types
+   */
   public Map<String, String> getMimeTypeMappings() {
     synchronized (lock) {
       return Map.copyOf(mimeTypeMap);
     }
   }
 
+  /**
+   * Extracts the file extension from a file name.
+   *
+   * @param fileName the name of the file
+   * @return the extension (lowercase), or an empty string if none is found
+   */
   private String getFileExtension(String fileName) {
     int lastDotIndex = fileName.lastIndexOf('.');
     return (lastDotIndex == -1 || lastDotIndex == fileName.length() - 1)
-        ? ""
-        : fileName.substring(lastDotIndex + 1).toLowerCase();
+            ? ""
+            : fileName.substring(lastDotIndex + 1).toLowerCase();
   }
 
+  /**
+   * Retrieves the default MIME type used as a fallback.
+   *
+   * @return the default MIME type
+   */
   public String getDefaultMimeType() {
     return defaultMimeType;
   }
 
+  /**
+   * Sets the default MIME type to use as a fallback.
+   *
+   * @param defaultMimeType the MIME type to set as default
+   */
   public void setDefaultMimeType(String defaultMimeType) {
     this.defaultMimeType = defaultMimeType;
   }
 
+  /**
+   * Checks if fallback to the default MIME type is allowed when no mapping is found.
+   *
+   * @return true if fallback is allowed, false otherwise
+   */
   public boolean isAllowFallbackMimeType() {
     return allowFallbackMimeType;
   }
 
+  /**
+   * Sets whether to allow fallback to the default MIME type when no mapping is found.
+   *
+   * @param allowFallbackMimeType true to enable fallback, false to disable
+   */
   public void setAllowFallbackMimeType(boolean allowFallbackMimeType) {
     this.allowFallbackMimeType = allowFallbackMimeType;
   }
 
+  /**
+   * Checks if unknown MIME types (not in the predefined set) are allowed.
+   *
+   * @return true if unknown MIME types are allowed, false otherwise
+   */
   public boolean isAllowUnknownMimeType() {
     return allowUnknownMimeType;
   }
 
+  /**
+   * Sets whether to allow unknown MIME types not in the predefined set.
+   *
+   * @param allowUnknownMimeType true to allow unknown types, false to restrict to known types
+   */
   public void setAllowUnknownMimeType(boolean allowUnknownMimeType) {
     this.allowUnknownMimeType = allowUnknownMimeType;
   }
