@@ -58,10 +58,13 @@ public final class Message {
    * Constructs a Message with a subject and sender, initializing empty lists for other fields.
    * Used by existing code for backward compatibility.
    *
+   * @deprecated Use {@link Message#builder()} instead for build-time validation and a fluent API.
+   *             This constructor does not enforce required fields like recipients or content until runtime.
    * @param subject the subject of the email
    * @param from the sender of the email
    * @throws NullPointerException if subject or from is null
    */
+  @Deprecated
   public Message(String subject, MailUser from) {
     this.subject = Objects.requireNonNull(subject, "Subject must not be null.");
     this.from = Objects.requireNonNull(from, "Sender must not be null.");
@@ -79,11 +82,14 @@ public final class Message {
    * Delegates to the simpler constructor and sets the headerFrom field.
    * Preserved for backward compatibility with existing code.
    *
+   * @deprecated Use {@link Message#builder()} with {@link Builder#headerFrom(MailUser)} instead
+   *             for a more robust and validated construction process.
    * @param subject the subject of the email
    * @param from the sender of the email
    * @param headerFrom the sender to appear in the email headers
    * @throws NullPointerException if subject or from is null
    */
+  @Deprecated
   public Message(String subject, MailUser from, MailUser headerFrom) {
     this(subject, from);
     setHeaderFrom(headerFrom);
@@ -224,9 +230,12 @@ public final class Message {
   /**
    * Adds an attachment to the email.
    *
+   * @deprecated Use {@link Builder#addAttachment(Attachment)} within {@link Message#builder()} instead
+   *             for a fluent, validated construction process.
    * @param attachment the attachment to add
    * @throws NullPointerException if attachment is null
    */
+  @Deprecated
   public void addAttachment(Attachment attachment) {
     attachments.add(Objects.requireNonNull(attachment, "Attachment must not be null."));
   }
@@ -234,9 +243,12 @@ public final class Message {
   /**
    * Adds a content item to the email.
    *
+   * @deprecated Use {@link Builder#addContent(Content)} within {@link Message#builder()} instead
+   *             for a fluent, validated construction process.
    * @param contentItem the content item to add
    * @throws NullPointerException if contentItem is null
    */
+  @Deprecated
   public void addContent(Content contentItem) {
     content.add(Objects.requireNonNull(contentItem, "Content must not be null."));
   }
@@ -244,9 +256,12 @@ public final class Message {
   /**
    * Adds a primary recipient (To field) to the email.
    *
+   * @deprecated Use {@link Builder#addTo(MailUser)} within {@link Message#builder()} instead
+   *             for a fluent, validated construction process.
    * @param to the recipient to add
    * @throws NullPointerException if to is null
    */
+  @Deprecated
   public void addTo(MailUser to) {
     tos.add(Objects.requireNonNull(to, "Recipient must not be null."));
   }
@@ -254,9 +269,12 @@ public final class Message {
   /**
    * Adds a CC recipient to the email.
    *
+   * @deprecated Use {@link Builder#addCc(MailUser)} within {@link Message#builder()} instead
+   *             for a fluent, validated construction process.
    * @param ccUser the CC recipient to add
    * @throws NullPointerException if ccUser is null
    */
+  @Deprecated
   public void addCc(MailUser ccUser) {
     cc.add(Objects.requireNonNull(ccUser, "CC recipient must not be null."));
   }
@@ -264,9 +282,12 @@ public final class Message {
   /**
    * Adds a BCC recipient to the email.
    *
+   * @deprecated Use {@link Builder#addBcc(MailUser)} within {@link Message#builder()} instead
+   *             for a fluent, validated construction process.
    * @param bccUser the BCC recipient to add
    * @throws NullPointerException if bccUser is null
    */
+  @Deprecated
   public void addBcc(MailUser bccUser) {
     bcc.add(Objects.requireNonNull(bccUser, "BCC recipient must not be null."));
   }
@@ -274,9 +295,12 @@ public final class Message {
   /**
    * Adds a Reply-To recipient to the email.
    *
+   * @deprecated Use {@link Builder#addReplyTo(MailUser)} within {@link Message#builder()} instead
+   *             for a fluent, validated construction process.
    * @param replyToUser the Reply-To recipient to add
    * @throws NullPointerException if replyToUser is null
    */
+  @Deprecated
   public void addReplyTo(MailUser replyToUser) {
     replyTos.add(Objects.requireNonNull(replyToUser, "Reply-To recipient must not be null."));
   }

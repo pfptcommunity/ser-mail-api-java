@@ -43,7 +43,7 @@ import io.pfpt.ser.mail.*;
 public class Example {
   public static void main(String[] args) {
     // Initialize the Client with OAuth credentials from the config
-    Client client = new Client("<client_id_here>", "<client_secret_here>");
+    Client client = new Client("<client_id>", "<client_secret>");
     
     // Construct logo_a attachment with dynamic content ID
     var logo_b = Attachment.builder()
@@ -137,6 +137,26 @@ Message message = Message.builder()
         .addContent(new Content("<b>Test</b><br><img src=\"cid:logo\">", Content.ContentType.HTML))
         .addAttachment(Attachment.builder().fromFile("C:/temp/logo.png").dispositionInline("logo").build())
         .build();
+```
+
+### Concurrency Example
+```java
+ExecutorService executorService = Executors.newFixedThreadPool(10);
+Client client = new Client("<client_id>", "<client_secret>");
+for (int i = 0; i < 10; i++) {
+    executorService.submit(() -> {
+        Message msg = Message.builder()
+            .subject("Concurrent Test")
+            .from(new MailUser("sender@example.com"))
+            .addTo(new MailUser("recipient@example.com"))
+            .addContent(new Content("Test message", Content.ContentType.TEXT))
+            .build();
+        SendResult result = client.send(msg).join();
+        System.out.printf("Thread [%d] Status: %d\n", Thread.currentThread().getId(), result.getHttpResponse().statusCode());
+    });
+}
+executorService.shutdown();
+executorService.awaitTermination(60, TimeUnit.SECONDS);
 ```
 
 ## Known Issues
