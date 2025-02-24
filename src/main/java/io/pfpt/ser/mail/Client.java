@@ -1,7 +1,6 @@
 package io.pfpt.ser.mail;
 
 import io.pfpt.ser.http.OAuthHttpClient;
-
 import jakarta.json.bind.Jsonb;
 import jakarta.json.bind.JsonbBuilder;
 import java.net.URI;
@@ -13,9 +12,8 @@ import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * A client for sending emails via the Proofpoint SER API.
- * This class uses an OAuth-authenticated HTTP client to send messages asynchronously,
- * handling JSON serialization and API communication.
+ * A client for sending emails via the Proofpoint SER API. This class uses an OAuth-authenticated
+ * HTTP client to send messages asynchronously, handling JSON serialization and API communication.
  */
 public final class Client {
   // JSON-B instance for serializing messages to JSON
@@ -54,13 +52,13 @@ public final class Client {
 
     try {
       this.httpClient =
-              new OAuthHttpClient(
-                      "https://mail.ser.proofpoint.com/v1/token", // Token endpoint for OAuth
-                      clientId,
-                      clientSecret,
-                      "", // No specific scope defined
-                      300, // Refresh token 5 minutes before expiration
-                      httpClient);
+          new OAuthHttpClient(
+              "https://mail.ser.proofpoint.com/v1/token", // Token endpoint for OAuth
+              clientId,
+              clientSecret,
+              "", // No specific scope defined
+              300, // Refresh token 5 minutes before expiration
+              httpClient);
 
     } catch (Exception ex) {
       throw new IllegalStateException("Failed to initialize the Proofpoint SER API client.", ex);
@@ -68,11 +66,12 @@ public final class Client {
   }
 
   /**
-   * Sends an email message asynchronously via the Proofpoint SER API.
-   * Serializes the message to JSON and submits it to the API endpoint, returning a future result.
+   * Sends an email message asynchronously via the Proofpoint SER API. Serializes the message to
+   * JSON and submits it to the API endpoint, returning a future result.
    *
    * @param message the Message object to send
-   * @return a CompletableFuture resolving to a SendResult containing the outcome of the send operation
+   * @return a CompletableFuture resolving to a SendResult containing the outcome of the send
+   *     operation
    * @throws IllegalArgumentException if the message is null
    * @throws IllegalStateException if JSON serialization fails
    */
@@ -89,14 +88,16 @@ public final class Client {
     }
 
     HttpRequest request =
-            HttpRequest.newBuilder()
-                    .uri(URI.create("https://mail.ser.proofpoint.com/v1/send")) // API endpoint for sending messages
-                    .header("Content-Type", "application/json")
-                    .POST(HttpRequest.BodyPublishers.ofString(json, StandardCharsets.UTF_8))
-                    .build();
+        HttpRequest.newBuilder()
+            .uri(
+                URI.create(
+                    "https://mail.ser.proofpoint.com/v1/send")) // API endpoint for sending messages
+            .header("Content-Type", "application/json")
+            .POST(HttpRequest.BodyPublishers.ofString(json, StandardCharsets.UTF_8))
+            .build();
 
     return httpClient
-            .sendAsync(request, HttpResponse.BodyHandlers.ofString()) // Send request asynchronously
-            .thenCompose(SendResult::createAsync); // Transform response into SendResult
+        .sendAsync(request, HttpResponse.BodyHandlers.ofString()) // Send request asynchronously
+        .thenCompose(SendResult::createAsync); // Transform response into SendResult
   }
 }

@@ -7,7 +7,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * A default implementation of the IMimeMapper interface for mapping file extensions to MIME types.
- * This class provides thread-safe operations for retrieving, validating, and managing MIME type mappings.
+ * This class provides thread-safe operations for retrieving, validating, and managing MIME type
+ * mappings.
  */
 public final class DefaultMimeMapper implements IMimeMapper {
   // Thread-safe map storing file extensions to MIME type mappings
@@ -1038,18 +1039,19 @@ public final class DefaultMimeMapper implements IMimeMapper {
    *
    * @param fileName the name of the file to determine the MIME type for
    * @return the corresponding MIME type
-   * @throws IllegalArgumentException if the file name is invalid or no MIME type is found and fallback is disabled
+   * @throws IllegalArgumentException if the file name is invalid or no MIME type is found and
+   *     fallback is disabled
    */
   public String getMimeType(String fileName) {
     if (fileName == null || fileName.isBlank()) {
       throw new IllegalArgumentException(
-              "File name must not be null, empty, or contain only whitespace.");
+          "File name must not be null, empty, or contain only whitespace.");
     }
 
     String extension = getFileExtension(fileName);
     if (extension.isEmpty()) {
       throw new IllegalArgumentException(
-              "File extension could not be determined from '" + fileName + "'.");
+          "File extension could not be determined from '" + fileName + "'.");
     }
 
     synchronized (lock) {
@@ -1062,9 +1064,9 @@ public final class DefaultMimeMapper implements IMimeMapper {
       }
 
       throw new IllegalArgumentException(
-              "MIME type could not be determined for '"
-                      + fileName
-                      + "'. Provide a MIME type explicitly or enable fallback.");
+          "MIME type could not be determined for '"
+              + fileName
+              + "'. Provide a MIME type explicitly or enable fallback.");
     }
   }
 
@@ -1078,7 +1080,7 @@ public final class DefaultMimeMapper implements IMimeMapper {
   public boolean isValidMimeType(String mimeType) {
     if (mimeType == null || mimeType.isBlank()) {
       throw new IllegalArgumentException(
-              "MIME type must not be null, empty, or contain only whitespace.");
+          "MIME type must not be null, empty, or contain only whitespace.");
     }
 
     synchronized (lock) {
@@ -1097,11 +1099,11 @@ public final class DefaultMimeMapper implements IMimeMapper {
   public boolean addOrUpdateMimeType(String extension, String mimeType) {
     if (extension == null || extension.isBlank()) {
       throw new IllegalArgumentException(
-              "Extension must not be null, empty, or contain only whitespace.");
+          "Extension must not be null, empty, or contain only whitespace.");
     }
     if (mimeType == null || mimeType.isBlank()) {
       throw new IllegalArgumentException(
-              "MIME type must not be null, empty, or contain only whitespace.");
+          "MIME type must not be null, empty, or contain only whitespace.");
     }
 
     extension = extension.trim().toLowerCase();
@@ -1139,8 +1141,8 @@ public final class DefaultMimeMapper implements IMimeMapper {
   private String getFileExtension(String fileName) {
     int lastDotIndex = fileName.lastIndexOf('.');
     return (lastDotIndex == -1 || lastDotIndex == fileName.length() - 1)
-            ? ""
-            : fileName.substring(lastDotIndex + 1).toLowerCase();
+        ? ""
+        : fileName.substring(lastDotIndex + 1).toLowerCase();
   }
 
   /**

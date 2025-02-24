@@ -8,15 +8,15 @@ import java.util.Objects;
 import java.util.regex.Pattern;
 
 /**
- * Represents a mail user with an email address and an optional name.
- * This class enforces email validation and provides JSON serialization for mail-related operations.
+ * Represents a mail user with an email address and an optional name. This class enforces email
+ * validation and provides JSON serialization for mail-related operations.
  */
 public final class MailUser {
 
   // Regular expression pattern for validating email addresses per RFC 5322
   private static final Pattern EMAIL_PATTERN =
-          Pattern.compile(
-                  "(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)\\])");
+      Pattern.compile(
+          "(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)\\])");
 
   // JSON-B instance configured for pretty-printed serialization
   private static final Jsonb JSONB = JsonbBuilder.create(new JsonbConfig().withFormatting(true));
@@ -71,8 +71,8 @@ public final class MailUser {
   }
 
   /**
-   * Sets the email address of the mail user.
-   * Validates the email format and ensures it is not null or blank.
+   * Sets the email address of the mail user. Validates the email format and ensures it is not null
+   * or blank.
    *
    * @param email the email address to set
    * @throws NullPointerException if email is null
@@ -97,8 +97,7 @@ public final class MailUser {
   }
 
   /**
-   * Sets the name of the mail user.
-   * The name is optional and can be null.
+   * Sets the name of the mail user. The name is optional and can be null.
    *
    * @param name the name to set (can be null)
    */

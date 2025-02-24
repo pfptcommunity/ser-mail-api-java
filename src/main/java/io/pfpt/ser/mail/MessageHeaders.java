@@ -7,8 +7,8 @@ import jakarta.json.bind.annotation.JsonbProperty;
 import java.util.Objects;
 
 /**
- * Represents the headers of an email message, specifically the sender information.
- * This class encapsulates the "From" field of an email header and provides JSON serialization.
+ * Represents the headers of an email message, specifically the sender information. This class
+ * encapsulates the "From" field of an email header and provides JSON serialization.
  */
 public final class MessageHeaders {
 

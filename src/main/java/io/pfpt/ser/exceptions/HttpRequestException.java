@@ -1,9 +1,9 @@
 package io.pfpt.ser.exceptions;
 
 /**
- * Custom exception class for handling errors related to HTTP requests.
- * This exception is thrown when an HTTP request fails due to network issues,
- * invalid responses, or other request-specific problems.
+ * Custom exception class for handling errors related to HTTP requests. This exception is thrown
+ * when an HTTP request fails due to network issues, invalid responses, or other request-specific
+ * problems.
  */
 public class HttpRequestException extends Exception {
 

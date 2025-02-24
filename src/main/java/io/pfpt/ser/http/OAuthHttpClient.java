@@ -2,6 +2,10 @@ package io.pfpt.ser.http;
 
 import io.pfpt.ser.exceptions.HttpRequestException;
 import io.pfpt.ser.exceptions.HttpTokenRefreshException;
+import jakarta.json.Json;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonReader;
+import jakarta.json.stream.JsonParsingException;
 import java.io.IOException;
 import java.io.StringReader;
 import java.net.URI;
@@ -14,11 +18,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReentrantLock;
-
-import jakarta.json.Json;
-import jakarta.json.JsonObject;
-import jakarta.json.JsonReader;
-import jakarta.json.stream.JsonParsingException;
 
 /**
  * A client for making HTTP requests with OAuth 2.0 authentication.

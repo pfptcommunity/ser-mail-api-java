@@ -26,8 +26,8 @@ public final class SendResult {
   private final String rawJson;
 
   /**
-   * Private constructor to create a SendResult from an HTTP response and its raw JSON body.
-   * Parses the JSON to populate fields, with fallback to empty strings if parsing fails.
+   * Private constructor to create a SendResult from an HTTP response and its raw JSON body. Parses
+   * the JSON to populate fields, with fallback to empty strings if parsing fails.
    *
    * @param httpResponse the HTTP response from the send operation
    * @param rawJson the raw JSON string from the response body
@@ -40,10 +40,9 @@ public final class SendResult {
     Map<String, Object> parsedJson = new HashMap<>();
     if (!this.rawJson.isBlank()) {
       try (Jsonb jsonb = JsonbBuilder.create()) {
-        parsedJson = jsonb.fromJson(
-                this.rawJson,
-                new HashMap<String, Object>() {}.getClass().getGenericSuperclass()
-        );
+        parsedJson =
+            jsonb.fromJson(
+                this.rawJson, new HashMap<String, Object>() {}.getClass().getGenericSuperclass());
       } catch (Exception e) {
         // Handle JSON parsing failure gracefully—fields default to empty strings
       }
@@ -55,8 +54,8 @@ public final class SendResult {
   }
 
   /**
-   * Creates a SendResult asynchronously from an HTTP response.
-   * Wraps the construction in a CompletableFuture for non-blocking execution.
+   * Creates a SendResult asynchronously from an HTTP response. Wraps the construction in a
+   * CompletableFuture for non-blocking execution.
    *
    * @param httpResponse the HTTP response from the send operation
    * @return a CompletableFuture resolving to a SendResult instance

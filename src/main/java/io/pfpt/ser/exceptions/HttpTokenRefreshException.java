@@ -1,9 +1,9 @@
 package io.pfpt.ser.exceptions;
 
 /**
- * Custom exception class for handling errors during HTTP token refresh operations.
- * This exception is thrown when a token refresh request fails, such as due to
- * expired credentials, server unavailability, or authentication issues.
+ * Custom exception class for handling errors during HTTP token refresh operations. This exception
+ * is thrown when a token refresh request fails, such as due to expired credentials, server
+ * unavailability, or authentication issues.
  */
 public class HttpTokenRefreshException extends Exception {
 

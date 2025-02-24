@@ -7,15 +7,15 @@ import jakarta.json.bind.Jsonb;
 import jakarta.json.bind.JsonbBuilder;
 
 /**
- * A legacy example demonstrating how to send an email using the Proofpoint SER API.
- * This class constructs a Message object using the traditional constructor and add methods,
- * showcasing basic email functionality including content, attachments, and recipients.
+ * A legacy example demonstrating how to send an email using the Proofpoint SER API. This class
+ * constructs a Message object using the traditional constructor and add methods, showcasing basic
+ * email functionality including content, attachments, and recipients.
  */
 public class SimpleExample {
 
   /**
-   * Loads configuration from a JSON file into a Map.
-   * Reads client credentials from a file for use in initializing the Client.
+   * Loads configuration from a JSON file into a Map. Reads client credentials from a file for use
+   * in initializing the Client.
    *
    * @param filePath the path to the configuration file (e.g., "ser.api_key")
    * @return a Map containing key-value pairs from the JSON file
@@ -31,8 +31,8 @@ public class SimpleExample {
   }
 
   /**
-   * Main method demonstrating email construction and sending via the Proofpoint SER API.
-   * Uses legacy constructor-based Message creation with incremental additions.
+   * Main method demonstrating email construction and sending via the Proofpoint SER API. Uses
+   * legacy constructor-based Message creation with incremental additions.
    *
    * @param args command-line arguments (not used in this example)
    */
@@ -45,19 +45,19 @@ public class SimpleExample {
 
     // Create a basic Message with subject and sender
     Message message =
-            new Message("This is a test email", new MailUser("sender@example.com", "Joe Sender"));
+        new Message("This is a test email", new MailUser("sender@example.com", "Joe Sender"));
 
     // Add text content body
     message.addContent(new Content("This is a test message", Content.ContentType.TEXT));
 
     // Add HTML content body with an embedded image referenced by content ID
     message.addContent(
-            new Content(
-                    "<b>This is a test message</b><br><img src=\"cid:logo\">", Content.ContentType.HTML));
+        new Content(
+            "<b>This is a test message</b><br><img src=\"cid:logo\">", Content.ContentType.HTML));
 
     // Create an inline attachment from a file on disk, setting its content ID to "logo"
     message.addAttachment(
-            Attachment.builder().fromFile("C:/temp/logo_a.png").dispositionInline("logo").build());
+        Attachment.builder().fromFile("C:/temp/logo_a.png").dispositionInline("logo").build());
 
     // Add primary recipients (To field)
     message.addTo(new MailUser("recipient1@example.com", "Recipient 1"));
@@ -73,10 +73,13 @@ public class SimpleExample {
 
     // Add additional attachments using various construction methods
     message.addAttachment(
-            Attachment.builder().fromBase64("VGhpcyBpcyBhIHRlc3Qh", "test.txt").build()); // Base64-encoded text
-    message.addAttachment(Attachment.builder().fromFile("C:/temp/file.csv").build()); // File from disk
+        Attachment.builder()
+            .fromBase64("VGhpcyBpcyBhIHRlc3Qh", "test.txt")
+            .build()); // Base64-encoded text
     message.addAttachment(
-            Attachment.builder().fromBytes(new byte[] {1, 2, 3}, "bytes.txt").build()); // Byte array
+        Attachment.builder().fromFile("C:/temp/file.csv").build()); // File from disk
+    message.addAttachment(
+        Attachment.builder().fromBytes(new byte[] {1, 2, 3}, "bytes.txt").build()); // Byte array
 
     // Set the header "From" field to override the sender in the email headers
     message.setHeaderFrom(new MailUser("fancysender@example.com", "Header From"));

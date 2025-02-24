@@ -1,4 +1,5 @@
 # Proofpoint Secure Email Relay Mail API Java Library
+
 [![Maven Central Version](https://img.shields.io/maven-central/v/io.pfpt.ser/ser-mail-api)](https://central.sonatype.com/artifact/io.pfpt.ser/ser-mail-api)
 
 This library implements all the functions of the SER Email Relay API via **Java**.
@@ -14,6 +15,7 @@ This library implements all the functions of the SER Email Relay API via **Java*
 You can include the library in your project using **Maven**:
 
 ```xml
+
 <dependency>
     <groupId>io.pfpt.ser</groupId>
     <artifactId>ser-mail-api</artifactId>
@@ -23,7 +25,7 @@ You can include the library in your project using **Maven**:
 
 ## Features
 
-- **Send Emails**: Easily compose and send emails with minimal code.
+- **Send Emails**: Easily compose and send emails with minimal code using a fluent builder pattern.
 - **Support for Attachments**:
     - Attach files from disk
     - Encode attachments as Base64
@@ -41,50 +43,53 @@ You can include the library in your project using **Maven**:
 import io.pfpt.ser.mail.*;
 
 public class Example {
-  public static void main(String[] args) {
-    Map<String, String> config = loadConfig("ser.api_key");
+    public static void main(String[] args) {
+        // Initialize the Client with OAuth credentials from the config
+        Client client = new Client("<client_id_here>", "<client_secret_here>");
 
-    Client client = new Client(config.get("client_id"), config.get("client_secret"));
+        // Construct logo_a attachment with dynamic content ID
+        var logo_b = Attachment.builder()
+                .fromFile("c:/temp/logo_b.png") // Load logo_b from file
+                .dispositionInline() // Set dynamic content ID
+                .build();
 
-    Message message = new Message("This is a test email", new MailUser("sender@example.com", "Joe Sender"));
+        // Use the fluent builder to construct the Message in a single chain
+        Message message = Message.builder()
+                .subject("This is a test email") // Sets the email subject (required)
+                .from(new MailUser("sender@example.com", "Joe Sender")) // Sets the sender (required)
+                .addContent(new Content("This is a test message", Content.ContentType.TEXT)) // Adds plain text content (required minimum)
+                .addContent(new Content( // Required: Adds HTML content referencing both static and dynamic CIDs
+                        "<b>Static CID</b><br><img src=\"cid:logo\"><br><b>Dynamic CID</b><br><img src=\"cid:" + logo_b.getContentId() + "\">",
+                        Content.ContentType.HTML)) // Uses logo_b's auto-assigned content ID retrieved from getContentId()
+                .addAttachment(Attachment.builder().fromFile("C:/temp/logo_a.png").dispositionInline("logo").build()) // Adds an inline attachment with content ID "logo"
+                .addAttachment(logo_b) // Adds logo_b with its dynamically assigned content ID
+                .addTo(new MailUser("recipient1@example.com", "Recipient 1")) // Adds a primary recipient (required minimum)
+                .addTo(new MailUser("recipient2@example.com", "Recipient 2")) // Adds a second primary recipient
+                .addCc(new MailUser("cc1@example.com", "CC Recipient 1")) // Adds a CC recipient
+                .addCc(new MailUser("cc2@example.com", "CC Recipient 2")) // Adds a second CC recipient
+                .addBcc(new MailUser("bcc1@example.com", "BCC Recipient 1")) // Adds a BCC recipient
+                .addBcc(new MailUser("bcc2@example.com", "BCC Recipient 2")) // Adds a second BCC recipient
+                .addAttachment(Attachment.builder().fromBase64("VGhpcyBpcyBhIHRlc3Qh", "test.txt").build()) // Adds an attachment from Base64-encoded text
+                .addAttachment(Attachment.builder().fromFile("C:/temp/file.csv").build()) // Adds an attachment from a file
+                .addAttachment(Attachment.builder().fromBytes(new byte[]{1, 2, 3}, "bytes.txt").build()) // Adds an attachment from a byte array
+                .headerFrom(new MailUser("fancysender@example.com", "Header From")) // Sets the header "From" field
+                .addReplyTo(new MailUser("noreply@example.com", "No Reply")) // Sets a Reply-To address
+                .build(); // Constructs the Message, enforcing required fields (from, tos, subject, content)
 
-    // Add text content body
-    message.addContent(new Content("This is a test message", Content.ContentType.TEXT));
+        // Print the JSON representation of the Message for debugging
+        System.out.println(message);
 
-    // Add HTML content body, with embedded image
-    message.addContent(new Content("<b>This is a test message</b><br><img src=\"cid:logo\">", Content.ContentType.HTML));
-
-    // Create an inline attachment from disk and set the cid
-    message.addAttachment(Attachment.builder().fromFile("C:/temp/logo.png").dispositionInline("logo").build());
-
-    // Add recipients
-    message.addTo(new MailUser("recipient1@example.com", "Recipient 1"));
-    message.addTo(new MailUser("recipient2@example.com", "Recipient 2"));
-
-    // Add CC
-    message.addCc(new MailUser("cc1@example.com", "CC Recipient 1"));
-    message.addCc(new MailUser("cc2@example.com", "CC Recipient 2"));
-
-    // Add BCC
-    message.addBcc(new MailUser("bcc1@example.com", "BCC Recipient 1"));
-    message.addBcc(new MailUser("bcc2@example.com", "BCC Recipient 2"));
-
-    // Add attachments
-    message.addAttachment(Attachment.builder().fromBase64("VGhpcyBpcyBhIHRlc3Qh", "test.txt").build());
-    message.addAttachment(Attachment.builder().fromFile("C:/temp/file.csv").build());
-    message.addAttachment(Attachment.builder().fromBytes(new byte[]{1, 2, 3}, "bytes.txt").build());
-
-    // Set Reply-To
-    message.addReplyTo(new MailUser("noreply@proofpoint.com", "No Reply"));
-
-    // Send the email
-    SendResult sendResult = client.send(message).join();
-
-    System.out.println("HTTP Status: " + sendResult.getHttpResponse().statusCode());
-    System.out.println("Reason: " + sendResult.getReason());
-    System.out.println("Message ID: " + sendResult.getMessageId());
-    System.out.println("Request ID: " + sendResult.getRequestId());
-  }
+        // Send the message asynchronously and wait for the result
+        SendResult sendResult = client.send(message).join();
+        // Output the HTTP status code from the API response
+        System.out.println("HTTP Status: " + sendResult.getHttpResponse().statusCode());
+        // Output the message ID from the API response
+        System.out.println("Message ID: " + sendResult.getMessageId());
+        // Output the reason (if any) from the API response
+        System.out.println("Reason: " + sendResult.getReason());
+        // Output the request ID from the API response
+        System.out.println("Request ID: " + sendResult.getRequestId());
+    }
 }
 ```
 
@@ -95,35 +100,75 @@ public class Example {
 
 ```java
 // Create an attachment from disk; the MIME type will be "text/csv", and disposition will be "Disposition.Attachment"
-Attachment.builder().fromFile("C:/temp/file.csv").build();
+Attachment.builder().
+
+fromFile("C:/temp/file.csv").
+
+build();
 
 // This will throw an error, as the MIME type is unknown
-Attachment.builder().fromFile("C:/temp/file.unknown").build();
+Attachment.
+
+builder().
+
+fromFile("C:/temp/file.unknown").
+
+build();
 
 // Create an attachment and specify the type information. The disposition will be "Disposition.Attachment", filename will be unknown.txt, and MIME type "text/plain"
-Attachment.builder().fromFile("C:/temp/file.unknown").filename("unknown.txt").build();
+Attachment.
+
+builder().
+
+fromFile("C:/temp/file.unknown").
+
+filename("unknown.txt").
+
+build();
 
 // Create an attachment and specify the type information. The disposition will be "Disposition.Attachment", filename will be file.unknown, and MIME type "text/plain"
-Attachment.builder().fromFile("C:/temp/file.unknown").mimeType("text/plain").build();
+Attachment.
+
+builder().
+
+fromFile("C:/temp/file.unknown").
+
+mimeType("text/plain").
+
+build();
 ```
 
 ## Inline Attachments and Content-IDs
 
-When creating attachments, they are `Disposition.Attachment` by default. To properly reference a **Content-ID** (e.g.,
-`<img src="cid:logo">`), you must explicitly set the attachment disposition to `Disposition.Inline`.
-If the attachment type is set to `Disposition.Inline`, a default unique **Content-ID** will be generated.
+When creating attachments, they are `Disposition.Attachment` by default. To use a **Content-ID** (e.g.,
+`<img src="cid:logo">`) in HTML content, set the disposition to `Disposition.Inline`. The library supports both manual
+and auto-generated content IDs.
 
 ### Using a Dynamically Generated Content-ID
+
 ```java
+// Create an inline attachment with an auto-generated content ID
 Attachment logo = Attachment.builder().fromFile("C:/temp/logo.png").dispositionInline().build();
-message.addContent(new Content("<b>Test</b><br><img src=\"cid:" + logo.getContentId() + "\">", Content.ContentType.HTML));
-message.addAttachment(logo);
+// Use the dynamic content ID in HTML content
+Message message = Message.builder()
+        .subject("Dynamic CID Test")
+        .from(new MailUser("sender@example.com"))
+        .addTo(new MailUser("recipient@example.com"))
+        .addContent(new Content("<b>Test</b><br><img src=\"cid:" + logo.getContentId() + "\">", Content.ContentType.HTML))
+        .addAttachment(logo)
+        .build();
 ```
 
 ### Setting a Custom Content-ID
+
 ```java
-message.addAttachment(Attachment.builder().fromFile("C:/temp/logo.png").dispositionInline("logo").build());
-message.addContent(new Content("<b>Test</b><br><img src=\"cid:logo\">", Content.ContentType.HTML));
+Message message = Message.builder()
+        .subject("Static CID Test")
+        .from(new MailUser("sender@example.com"))
+        .addTo(new MailUser("recipient@example.com"))
+        .addContent(new Content("<b>Test</b><br><img src=\"cid:logo\">", Content.ContentType.HTML))
+        .addAttachment(Attachment.builder().fromFile("C:/temp/logo.png").dispositionInline("logo").build())
+        .build();
 ```
 
 ## Known Issues
@@ -153,9 +198,11 @@ Raw JSON: {"request_id":"fe9a1acf60a20c9d90bed843f6530156","reason":"attachments
 This issue has been reported to **Proofpoint Product Management**.
 
 ## Limitations
+
 - The Proofpoint API currently does not support **empty file attachments**.
 - If an empty file is sent, you will receive a **400 Bad Request** error.
 
 ## Additional Resources
+
 For more information, refer to the official **Proofpoint Secure Email Relay API documentation**:  
 [**API Documentation**](https://api-docs.ser.proofpoint.com/docs/email-submission)

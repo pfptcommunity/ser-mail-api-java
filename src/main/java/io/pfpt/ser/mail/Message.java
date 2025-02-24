@@ -1,13 +1,13 @@
 package io.pfpt.ser.mail;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
 import jakarta.json.bind.Jsonb;
 import jakarta.json.bind.JsonbBuilder;
 import jakarta.json.bind.JsonbConfig;
 import jakarta.json.bind.annotation.JsonbProperty;
 import jakarta.json.bind.annotation.JsonbTransient;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * Represents an email message with sender, recipients, content, and attachments.
@@ -123,6 +123,15 @@ public final class Message {
     this.cc = new ArrayList<>(cc);
     this.bcc = new ArrayList<>(bcc);
     this.replyTos = new ArrayList<>(replyTos);
+  }
+
+  /**
+   * Provides a factory method to create a new Builder instance.
+   *
+   * @return a new Builder for constructing a Message
+   */
+  public static Builder builder() {
+    return new Builder();
   }
 
   /**
@@ -429,14 +438,5 @@ public final class Message {
               replyTos
       );
     }
-  }
-
-  /**
-   * Provides a factory method to create a new Builder instance.
-   *
-   * @return a new Builder for constructing a Message
-   */
-  public static Builder builder() {
-    return new Builder();
   }
 }
