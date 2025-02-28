@@ -1,10 +1,10 @@
 package io.pfpt.ser.mail;
 
+import jakarta.json.bind.Jsonb;
+import jakarta.json.bind.JsonbBuilder;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Map;
-import jakarta.json.bind.Jsonb;
-import jakarta.json.bind.JsonbBuilder;
 
 /**
  * An example demonstrating email sending using the Proofpoint SER API with a fluent builder. This
@@ -44,11 +44,12 @@ public class BasicExample {
     Client client = new Client(config.get("client_id"), config.get("client_secret"));
 
     // Use the fluent builder to construct and send an email
-    Message message = Message.builder()
+    Message message =
+        Message.builder()
             .subject("This is a test email")
-            .from(new MailUser("sender@example.com", "Joe Sender"))
-            .addContent(new Content("This is a test message", Content.ContentType.TEXT))
-            .addTo(new MailUser("recipient1@example.com", "Recipient 1"))
+            .from("sender@example.com", "Joe Sender")
+            .addContent("This is a test message", Content.ContentType.TEXT)
+            .addTo("recipient1@example.com", "Recipient 1")
             .build();
 
     // Print the JSON representation of the Message for debugging

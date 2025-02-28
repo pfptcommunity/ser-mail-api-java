@@ -53,19 +53,16 @@ public class AdvancedExample {
     Message message =
         Message.builder()
             .subject("This is a test email") // Sets the email subject (required)
-            .from(new MailUser("sender@example.com", "Joe Sender")) // Sets the sender (required)
+            .from("sender@example.com", "Joe Sender") // Sets the sender (required)
             .addContent(
-                new Content(
-                    "This is a test message",
-                    Content.ContentType.TEXT)) // Adds plain text content (required minimum)
-            .addContent(
-                new Content( // Required: Adds HTML content referencing both static and dynamic CIDs
-                    "<b>Static CID</b><br><img src=\"cid:logo\"><br><b>Dynamic CID</b><br><img src=\"cid:"
-                        + logo_b.getContentId()
-                        + "\">",
-                    Content.ContentType
-                        .HTML)) // Uses logo_b's auto-assigned content ID retrieved from
-                                // getContentId()
+                "This is a test message",
+                Content.ContentType.TEXT) // Adds plain text content (required minimum)
+            .addContent( // Required: Adds HTML content referencing both static and dynamic CIDs
+                "<b>Static CID</b><br><img src=\"cid:logo\"><br><b>Dynamic CID</b><br><img src=\"cid:"
+                    + logo_b.getContentId()
+                    + "\">",
+                Content.ContentType.HTML) // Uses logo_b's auto-assigned content ID retrieved from
+            // getContentId()
             .addAttachment(
                 Attachment.builder()
                     .fromFile("C:/temp/logo_a.png")
@@ -73,17 +70,13 @@ public class AdvancedExample {
                     .build()) // Adds an inline attachment with content ID "logo"
             .addAttachment(logo_b) // Adds logo_b with its dynamically assigned content ID
             .addTo(
-                new MailUser(
-                    "recipient1@example.com",
-                    "Recipient 1")) // Adds a primary recipient (required minimum)
-            .addTo(
-                new MailUser(
-                    "recipient2@example.com", "Recipient 2")) // Adds a second primary recipient
-            .addCc(new MailUser("cc1@example.com", "CC Recipient 1")) // Adds a CC recipient
-            .addCc(new MailUser("cc2@example.com", "CC Recipient 2")) // Adds a second CC recipient
-            .addBcc(new MailUser("bcc1@example.com", "BCC Recipient 1")) // Adds a BCC recipient
-            .addBcc(
-                new MailUser("bcc2@example.com", "BCC Recipient 2")) // Adds a second BCC recipient
+                "recipient1@example.com",
+                "Recipient 1") // Adds a primary recipient (required minimum)
+            .addTo("recipient2@example.com", "Recipient 2") // Adds a second primary recipient
+            .addCc("cc1@example.com", "CC Recipient 1") // Adds a CC recipient
+            .addCc("cc2@example.com", "CC Recipient 2") // Adds a second CC recipient
+            .addBcc("bcc1@example.com", "BCC Recipient 1") // Adds a BCC recipient
+            .addBcc("bcc2@example.com", "BCC Recipient 2") // Adds a second BCC recipient
             .addAttachment(
                 Attachment.builder()
                     .fromBase64("VGhpcyBpcyBhIHRlc3Qh", "test.txt")
@@ -96,10 +89,8 @@ public class AdvancedExample {
                 Attachment.builder()
                     .fromBytes(new byte[] {1, 2, 3}, "bytes.txt")
                     .build()) // Adds an attachment from a byte array
-            .headerFrom(
-                new MailUser(
-                    "fancysender@example.com", "Header From")) // Sets the header "From" field
-            .addReplyTo(new MailUser("noreply@example.com", "No Reply")) // Sets a Reply-To address
+            .headerFrom("fancysender@example.com", "Header From") // Sets the header "From" field
+            .addReplyTo("noreply@example.com", "No Reply") // Sets a Reply-To address
             .build(); // Constructs the Message, enforcing required fields (from, tos, subject,
                       // content)
 
