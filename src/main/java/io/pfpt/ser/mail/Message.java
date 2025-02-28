@@ -6,13 +6,14 @@ import jakarta.json.bind.JsonbConfig;
 import jakarta.json.bind.annotation.JsonbProperty;
 import jakarta.json.bind.annotation.JsonbTransient;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
 /**
  * Represents an email message with sender, recipients, content, and attachments.
- * Supports construction via traditional constructors for backward compatibility
- * and a fluent builder pattern for flexible instantiation with build-time validation.
+ * This class uses a fluent builder pattern for instantiation with build-time validation.
+ * Instances of this class are immutable once constructed.
  */
 public final class Message {
   // JSON-B instance configured for pretty-printed serialization of the message
@@ -52,48 +53,7 @@ public final class Message {
 
   // Email headers, currently supporting only the "From" header
   @JsonbProperty("headers")
-  private MessageHeaders headers;
-
-  /**
-   * Constructs a Message with a subject and sender, initializing empty lists for other fields.
-   * Used by existing code for backward compatibility.
-   *
-   * @deprecated Use {@link Message#builder()} instead for build-time validation and a fluent API.
-   *             This constructor does not enforce required fields like recipients or content until runtime.
-   * @param subject the subject of the email
-   * @param from the sender of the email
-   * @throws NullPointerException if subject or from is null
-   */
-  @Deprecated
-  public Message(String subject, MailUser from) {
-    this.subject = Objects.requireNonNull(subject, "Subject must not be null.");
-    this.from = Objects.requireNonNull(from, "Sender must not be null.");
-    this.attachments = new ArrayList<>();
-    this.content = new ArrayList<>();
-    this.tos = new ArrayList<>();
-    this.cc = new ArrayList<>();
-    this.bcc = new ArrayList<>();
-    this.replyTos = new ArrayList<>();
-    this.headers = null;
-  }
-
-  /**
-   * Constructs a Message with a subject, sender, and header sender.
-   * Delegates to the simpler constructor and sets the headerFrom field.
-   * Preserved for backward compatibility with existing code.
-   *
-   * @deprecated Use {@link Message#builder()} with {@link Builder#headerFrom(MailUser)} instead
-   *             for a more robust and validated construction process.
-   * @param subject the subject of the email
-   * @param from the sender of the email
-   * @param headerFrom the sender to appear in the email headers
-   * @throws NullPointerException if subject or from is null
-   */
-  @Deprecated
-  public Message(String subject, MailUser from, MailUser headerFrom) {
-    this(subject, from);
-    setHeaderFrom(headerFrom);
-  }
+  private final MessageHeaders headers;
 
   /**
    * Package-private constructor for builder use, initializing all fields.
@@ -122,7 +82,7 @@ public final class Message {
           List<MailUser> replyTos) {
     this.subject = Objects.requireNonNull(subject, "Subject must not be null.");
     this.from = Objects.requireNonNull(from, "Sender must not be null.");
-    setHeaderFrom(headerFrom);
+    this.headers = headerFrom != null ? new MessageHeaders(headerFrom) : null;
     this.attachments = new ArrayList<>(attachments); // Defensive copy
     this.content = new ArrayList<>(content);
     this.tos = new ArrayList<>(tos);
@@ -145,14 +105,14 @@ public final class Message {
    *
    * @return the list of attachments
    */
-  public List<Attachment> getAttachments() { return attachments; }
+  public List<Attachment> getAttachments() { return Collections.unmodifiableList(attachments); }
 
   /**
    * Retrieves the list of content items.
    *
    * @return the list of content items
    */
-  public List<Content> getContent() { return content; }
+  public List<Content> getContent() { return Collections.unmodifiableList(content); }
 
   /**
    * Retrieves the sender of the email.
@@ -173,28 +133,28 @@ public final class Message {
    *
    * @return the list of To recipients
    */
-  public List<MailUser> getTos() { return tos; }
+  public List<MailUser> getTos() { return Collections.unmodifiableList(tos); }
 
   /**
    * Retrieves the list of CC recipients.
    *
    * @return the list of CC recipients
    */
-  public List<MailUser> getCc() { return cc; }
+  public List<MailUser> getCc() { return Collections.unmodifiableList(cc); }
 
   /**
    * Retrieves the list of BCC recipients.
    *
    * @return the list of BCC recipients
    */
-  public List<MailUser> getBcc() { return bcc; }
+  public List<MailUser> getBcc() { return Collections.unmodifiableList(bcc); }
 
   /**
    * Retrieves the list of Reply-To recipients.
    *
    * @return the list of Reply-To recipients
    */
-  public List<MailUser> getReplyTos() { return replyTos; }
+  public List<MailUser> getReplyTos() { return Collections.unmodifiableList(replyTos); }
 
   /**
    * Retrieves the email headers.
@@ -213,99 +173,6 @@ public final class Message {
   public MailUser getHeaderFrom() { return headers != null ? headers.getFrom() : null; }
 
   /**
-   * Sets the header "From" value, creating or updating the headers field as needed.
-   *
-   * @param headerFrom the sender to appear in the email headers, or null to clear headers
-   */
-  public void setHeaderFrom(MailUser headerFrom) {
-    if (headerFrom == null) {
-      this.headers = null;
-    } else if (this.headers == null) {
-      this.headers = new MessageHeaders(headerFrom);
-    } else {
-      this.headers.setFrom(headerFrom);
-    }
-  }
-
-  /**
-   * Adds an attachment to the email.
-   *
-   * @deprecated Use {@link Builder#addAttachment(Attachment)} within {@link Message#builder()} instead
-   *             for a fluent, validated construction process.
-   * @param attachment the attachment to add
-   * @throws NullPointerException if attachment is null
-   */
-  @Deprecated
-  public void addAttachment(Attachment attachment) {
-    attachments.add(Objects.requireNonNull(attachment, "Attachment must not be null."));
-  }
-
-  /**
-   * Adds a content item to the email.
-   *
-   * @deprecated Use {@link Builder#addContent(Content)} within {@link Message#builder()} instead
-   *             for a fluent, validated construction process.
-   * @param contentItem the content item to add
-   * @throws NullPointerException if contentItem is null
-   */
-  @Deprecated
-  public void addContent(Content contentItem) {
-    content.add(Objects.requireNonNull(contentItem, "Content must not be null."));
-  }
-
-  /**
-   * Adds a primary recipient (To field) to the email.
-   *
-   * @deprecated Use {@link Builder#addTo(MailUser)} within {@link Message#builder()} instead
-   *             for a fluent, validated construction process.
-   * @param to the recipient to add
-   * @throws NullPointerException if to is null
-   */
-  @Deprecated
-  public void addTo(MailUser to) {
-    tos.add(Objects.requireNonNull(to, "Recipient must not be null."));
-  }
-
-  /**
-   * Adds a CC recipient to the email.
-   *
-   * @deprecated Use {@link Builder#addCc(MailUser)} within {@link Message#builder()} instead
-   *             for a fluent, validated construction process.
-   * @param ccUser the CC recipient to add
-   * @throws NullPointerException if ccUser is null
-   */
-  @Deprecated
-  public void addCc(MailUser ccUser) {
-    cc.add(Objects.requireNonNull(ccUser, "CC recipient must not be null."));
-  }
-
-  /**
-   * Adds a BCC recipient to the email.
-   *
-   * @deprecated Use {@link Builder#addBcc(MailUser)} within {@link Message#builder()} instead
-   *             for a fluent, validated construction process.
-   * @param bccUser the BCC recipient to add
-   * @throws NullPointerException if bccUser is null
-   */
-  @Deprecated
-  public void addBcc(MailUser bccUser) {
-    bcc.add(Objects.requireNonNull(bccUser, "BCC recipient must not be null."));
-  }
-
-  /**
-   * Adds a Reply-To recipient to the email.
-   *
-   * @deprecated Use {@link Builder#addReplyTo(MailUser)} within {@link Message#builder()} instead
-   *             for a fluent, validated construction process.
-   * @param replyToUser the Reply-To recipient to add
-   * @throws NullPointerException if replyToUser is null
-   */
-  @Deprecated
-  public void addReplyTo(MailUser replyToUser) {
-    replyTos.add(Objects.requireNonNull(replyToUser, "Reply-To recipient must not be null."));
-  }
-
-  /**
    * Serializes the message to a JSON string using JSON-B.
    *
    * @return a pretty-printed JSON representation of the message
@@ -318,16 +185,16 @@ public final class Message {
    * Enforces minimum requirements (from, tos, subject, content) at build time.
    */
   public static class Builder {
+    private final List<Attachment> attachments = new ArrayList<>();
+    private final List<Content> content = new ArrayList<>();
+    private final List<MailUser> tos = new ArrayList<>();
+    private final List<MailUser> cc = new ArrayList<>();
+    private final List<MailUser> bcc = new ArrayList<>();
+    private final List<MailUser> replyTos = new ArrayList<>();
     // Temporary fields for building the Message
     private String subject;
     private MailUser from;
     private MailUser headerFrom;
-    private List<Attachment> attachments = new ArrayList<>();
-    private List<Content> content = new ArrayList<>();
-    private List<MailUser> tos = new ArrayList<>();
-    private List<MailUser> cc = new ArrayList<>();
-    private List<MailUser> bcc = new ArrayList<>();
-    private List<MailUser> replyTos = new ArrayList<>();
 
     // Package-private constructor to restrict instantiation to within the package
     Builder() { }

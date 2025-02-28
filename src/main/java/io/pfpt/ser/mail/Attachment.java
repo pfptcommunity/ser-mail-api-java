@@ -15,8 +15,8 @@ import java.util.UUID;
 
 /**
  * Represents a file attachment for an email, encapsulating its content, metadata, and disposition.
- * This class supports creating attachments from various sources (Base64 strings, files, or byte arrays)
- * and ensures proper validation and serialization for mail-related operations.
+ * This class is immutable and supports creating attachments from various sources (Base64 strings, files, or byte arrays)
+ * with proper validation and serialization for mail-related operations.
  */
 public final class Attachment {
 

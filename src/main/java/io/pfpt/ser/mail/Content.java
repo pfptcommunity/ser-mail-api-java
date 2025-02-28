@@ -11,7 +11,7 @@ import jakarta.json.bind.annotation.JsonbTypeAdapter;
 /**
  * Represents the content of an email, including its body and content type. This class supports
  * plain text or HTML content and provides JSON serialization for integration with mail-related
- * operations.
+ * operations. Instances of this class are immutable once constructed.
  */
 public final class Content {
 
@@ -20,12 +20,12 @@ public final class Content {
 
   // The body of the email content
   @JsonbProperty("body")
-  private String body;
+  private final String body;
 
   // The type of content (e.g., plain text or HTML)
   @JsonbProperty("type")
   @JsonbTypeAdapter(Content.ContentTypeJsonAdapter.class)
-  private ContentType contentType;
+  private final ContentType contentType;
 
   /**
    * Constructs a Content instance with the specified body and content type.
@@ -34,8 +34,8 @@ public final class Content {
    * @param contentType the type of content (TEXT or HTML)
    */
   public Content(String body, ContentType contentType) {
-    this.setBody(body);
-    this.setContentType(contentType);
+    this.body = Objects.requireNonNull(body, "Body must not be null.");
+    this.contentType = Objects.requireNonNull(contentType, "Content type must not be null.");
   }
 
   /**
@@ -48,32 +48,12 @@ public final class Content {
   }
 
   /**
-   * Sets the body of the content.
-   *
-   * @param body the content body to set
-   * @throws NullPointerException if the body is null
-   */
-  public void setBody(String body) {
-    this.body = Objects.requireNonNull(body, "Body must not be null.");
-  }
-
-  /**
    * Retrieves the content type.
    *
    * @return the content type (TEXT or HTML)
    */
   public ContentType getContentType() {
     return contentType;
-  }
-
-  /**
-   * Sets the content type.
-   *
-   * @param contentType the content type to set (TEXT or HTML)
-   * @throws NullPointerException if the content type is null
-   */
-  public void setContentType(ContentType contentType) {
-    this.contentType = Objects.requireNonNull(contentType, "Content type must not be null.");
   }
 
   /**

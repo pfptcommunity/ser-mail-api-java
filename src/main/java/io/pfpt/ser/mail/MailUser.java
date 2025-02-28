@@ -9,7 +9,8 @@ import java.util.regex.Pattern;
 
 /**
  * Represents a mail user with an email address and an optional name. This class enforces email
- * validation and provides JSON serialization for mail-related operations.
+ * validation and provides JSON serialization for mail-related operations. Instances of this class
+ * are immutable once constructed.
  */
 public final class MailUser {
 
@@ -23,11 +24,11 @@ public final class MailUser {
 
   // The email address of the mail user
   @JsonbProperty("email")
-  private String email;
+  private final String email;
 
   // The optional name of the mail user
   @JsonbProperty("name")
-  private String name;
+  private final String name;
 
   /**
    * Constructs a MailUser with the specified email address and no name.
@@ -45,8 +46,8 @@ public final class MailUser {
    * @param name the optional name of the user (can be null)
    */
   public MailUser(String email, String name) {
-    setEmail(email);
-    setName(name);
+    this.email = validateAndSetEmail(email);
+    this.name = name; // Name can be null, no further validation needed
   }
 
   /**
@@ -62,6 +63,23 @@ public final class MailUser {
   }
 
   /**
+   * Validates and returns the email address for assignment.
+   *
+   * @param email the email address to validate
+   * @return the validated email address
+   * @throws NullPointerException if email is null
+   * @throws IllegalArgumentException if email is blank or invalid
+   */
+  private static String validateAndSetEmail(String email) {
+    Objects.requireNonNull(email, "Email must not be null.");
+    if (email.isBlank()) {
+      throw new IllegalArgumentException("Email must not be empty or contain only whitespace.");
+    }
+    validateEmail(email);
+    return email;
+  }
+
+  /**
    * Retrieves the email address of the mail user.
    *
    * @return the email address
@@ -71,38 +89,12 @@ public final class MailUser {
   }
 
   /**
-   * Sets the email address of the mail user. Validates the email format and ensures it is not null
-   * or blank.
-   *
-   * @param email the email address to set
-   * @throws NullPointerException if email is null
-   * @throws IllegalArgumentException if email is blank or invalid
-   */
-  public void setEmail(String email) {
-    Objects.requireNonNull(email, "Email must not be null.");
-    if (email.isBlank()) {
-      throw new IllegalArgumentException("Email must not be empty or contain only whitespace.");
-    }
-    validateEmail(email);
-    this.email = email;
-  }
-
-  /**
    * Retrieves the name of the mail user.
    *
    * @return the name, or null if not set
    */
   public String getName() {
     return name;
-  }
-
-  /**
-   * Sets the name of the mail user. The name is optional and can be null.
-   *
-   * @param name the name to set (can be null)
-   */
-  public void setName(String name) {
-    this.name = name;
   }
 
   /**

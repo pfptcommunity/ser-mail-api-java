@@ -8,7 +8,8 @@ import java.util.Objects;
 
 /**
  * Represents the headers of an email message, specifically the sender information. This class
- * encapsulates the "From" field of an email header and provides JSON serialization.
+ * encapsulates the "From" field of an email header and provides JSON serialization. Instances of
+ * this class are immutable once constructed.
  */
 public final class MessageHeaders {
 
@@ -17,7 +18,7 @@ public final class MessageHeaders {
 
   // The sender of the email, represented as a MailUser object
   @JsonbProperty("from")
-  private MailUser from;
+  private final MailUser from;
 
   /**
    * Constructs a MessageHeaders instance with the specified sender.
@@ -36,16 +37,6 @@ public final class MessageHeaders {
    */
   public MailUser getFrom() {
     return from;
-  }
-
-  /**
-   * Sets the sender of the email.
-   *
-   * @param from the MailUser object to set as the sender
-   * @throws NullPointerException if the from parameter is null
-   */
-  public void setFrom(MailUser from) {
-    this.from = Objects.requireNonNull(from, "Header from address must not be null.");
   }
 
   /**
