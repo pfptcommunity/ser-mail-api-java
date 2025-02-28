@@ -221,6 +221,9 @@ public final class Message {
       return this;
     }
 
+    public Builder from(String email, String name) { this.from = new MailUser(email, name); return this; }
+    public Builder from(String email) { return from(email, null); }
+
     /**
      * Sets the header "From" value.
      *
@@ -231,6 +234,8 @@ public final class Message {
       this.headerFrom = headerFrom;
       return this;
     }
+    public Builder headerFrom(String email, String name) { this.headerFrom = new MailUser(email, name); return this; }
+    public Builder headerFrom(String email) { return headerFrom(email, null); }
 
     /**
      * Adds an attachment to the email.
@@ -255,7 +260,10 @@ public final class Message {
       this.content.add(Objects.requireNonNull(content, "Content must not be null."));
       return this;
     }
-
+    public Builder addContent(String body, Content.ContentType type) {
+      this.content.add(new Content(body, type));
+      return this;
+    }
     /**
      * Adds a primary recipient (To field) to the email.
      *
@@ -267,7 +275,8 @@ public final class Message {
       this.tos.add(Objects.requireNonNull(to, "Recipient must not be null."));
       return this;
     }
-
+    public Builder addTo(String email, String name) { this.tos.add(new MailUser(email, name)); return this; }
+    public Builder addTo(String email) { return addTo(email, null); }
     /**
      * Adds a CC recipient to the email.
      *
@@ -279,7 +288,8 @@ public final class Message {
       this.cc.add(Objects.requireNonNull(cc, "CC recipient must not be null."));
       return this;
     }
-
+    public Builder addCc(String email, String name) { this.cc.add(new MailUser(email, name)); return this; }
+    public Builder addCc(String email) { return addCc(email, null); }
     /**
      * Adds a BCC recipient to the email.
      *
@@ -291,6 +301,8 @@ public final class Message {
       this.bcc.add(Objects.requireNonNull(bcc, "BCC recipient must not be null."));
       return this;
     }
+    public Builder addBcc(String email, String name) { this.bcc.add(new MailUser(email, name)); return this; }
+    public Builder addBcc(String email) { return addBcc(email, null); }
 
     /**
      * Adds a Reply-To recipient to the email.
@@ -303,7 +315,8 @@ public final class Message {
       this.replyTos.add(Objects.requireNonNull(replyTo, "Reply-To recipient must not be null."));
       return this;
     }
-
+    public Builder addReplyTo(String email, String name) { this.replyTos.add(new MailUser(email, name)); return this; }
+    public Builder addReplyTo(String email) { return addReplyTo(email, null); }
     /**
      * Builds a Message instance with the configured fields.
      * Enforces minimum requirements for a valid email message.
