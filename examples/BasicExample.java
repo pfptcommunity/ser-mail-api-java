@@ -1,5 +1,4 @@
-package io.pfpt.ser.mail;
-
+import io.pfpt.ser.mail.*;
 import jakarta.json.bind.Jsonb;
 import jakarta.json.bind.JsonbBuilder;
 import java.io.FileReader;
