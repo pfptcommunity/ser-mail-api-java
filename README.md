@@ -41,8 +41,9 @@ import io.pfpt.ser.mail.*;
 
 public class Example {
   public static void main(String[] args) {
-    // Initialize the Client with OAuth credentials from the config
-    Client client = new Client("<client_id>", "<client_secret>");
+    // Initialize the Client with OAuth credentials from the config. 
+    // Default region when not specified is Region.US
+    Client client = new Client("<client_id>", "<client_secret>", Region.US);
 
     // Use the fluent builder to construct and send an email
     Message message = Message.builder()
@@ -74,8 +75,9 @@ import io.pfpt.ser.mail.*;
 
 public class Example {
   public static void main(String[] args) {
-    // Initialize the Client with OAuth credentials from the config
-    Client client = new Client("<client_id>", "<client_secret>");
+    // Initialize the Client with OAuth credentials from the config. 
+    // Default region when not specified is Region.US
+    Client client = new Client("<client_id>", "<client_secret>", Region.US);
     
     // Construct logo_a attachment with dynamic content ID
     var logo_b = Attachment.builder()
@@ -170,23 +172,44 @@ Message message = Message.builder()
 ```
 
 ## Concurrency Example
+
 ```java
+import io.pfpt.ser.mail.Region;
+
 ExecutorService executorService = Executors.newFixedThreadPool(10);
-Client client = new Client("<client_id>", "<client_secret>");
-for (int i = 0; i < 10; i++) {
-    executorService.submit(() -> {
-        Message msg = Message.builder()
-            .subject("Concurrent Test")
-            .from("sender@example.com")
-            .addTo("recipient@example.com")
-            .addContent("Test message", Content.ContentType.TEXT)
-            .build();
-        SendResult result = client.send(msg).join();
-        System.out.printf("Thread [%d] Status: %d\n", Thread.currentThread().getId(), result.getHttpResponse().statusCode());
-    });
-}
-executorService.shutdown();
-executorService.awaitTermination(60, TimeUnit.SECONDS);
+// Initialize the Client with OAuth credentials from the config. 
+// Default region when not specified is Region.US
+Client client = new Client("<client_id>", "<client_secret>", Region.US);
+for(
+int i = 0;
+i< 10;i++){
+        executorService.
+
+submit(() ->{
+Message msg = Message.builder()
+        .subject("Concurrent Test")
+        .from("sender@example.com")
+        .addTo("recipient@example.com")
+        .addContent("Test message", Content.ContentType.TEXT)
+        .build();
+SendResult result = client.send(msg).join();
+        System.out.
+
+printf("Thread [%d] Status: %d\n",Thread.currentThread().
+
+getId(),result.
+
+getHttpResponse().
+
+statusCode());
+        });
+        }
+        executorService.
+
+shutdown();
+executorService.
+
+awaitTermination(60,TimeUnit.SECONDS);
 ```
 
 ## Known Issues
