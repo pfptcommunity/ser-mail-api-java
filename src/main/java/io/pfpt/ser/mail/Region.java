@@ -8,7 +8,7 @@ public enum Region {
     private final String value;
 
     Region(String value) {
-        this.value = url;
+        this.value = value;
     }
 
     String getString() {
